@@ -460,5 +460,5 @@ async customSubmit(value) {
         }
     );
     });
-  }
+}
 }
