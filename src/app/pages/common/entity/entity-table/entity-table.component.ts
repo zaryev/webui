@@ -77,7 +77,7 @@ export class EntityTableComponent implements OnInit, AfterViewInit {
   @ViewChild('filter') filter: ElementRef;
  
   // MdPaginator Inputs
-  public paginationPageSize = 20;
+  public paginationPageSize = 10;
   public paginationPageSizeOptions = [5, 10, 20, 100, 1000];
   public paginationPageIndex = 0;
   public paginationPageEvent: any;
@@ -240,7 +240,13 @@ export class EntityTableComponent implements OnInit, AfterViewInit {
     for (let i = 0; i < rows.length; i++) {
       for (const attr in rows[i]) {
         if (rows[i].hasOwnProperty(attr)) {
-          rows[i][attr] = this.rowValue(rows[i], attr);
+          if (rows[i][attr] === true) {
+            rows[i][attr] = 'yes';
+          } else if (rows[i][attr] === false) {
+            rows[i][attr] = 'no';
+          } else {
+            rows[i][attr] = this.rowValue(rows[i], attr);  
+          }
         }
       }
     }
