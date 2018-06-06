@@ -127,7 +127,7 @@ export class VolumesListTableConfig implements InputTableConf {
             localSnackBar = this.snackBar;
 
             const conf: DialogFormConfiguration = {
-              title: "Lock " + row1.name,
+              title: "Lock Pool: " + row1.name,
               fieldConfig: [{
                 type : 'input',
                 inputType: 'password',
