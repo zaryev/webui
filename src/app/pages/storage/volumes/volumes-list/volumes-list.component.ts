@@ -13,12 +13,14 @@ import { MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 import * as _ from 'lodash';
 import { MatSnackBar } from '@angular/material';
+import { DialogFormConfiguration } from '../../../common/entity/entity-dialog/dialog-form-configuration.interface';
 
 import { Injectable } from '@angular/core';
 import { ErdService } from 'app/services/erd.service';
 import { T } from '../../../../translate-marker';
 import { EntityJobComponent } from '../../../common/entity/entity-job/entity-job.component';
-import { StorageService } from '../../../../services/storage.service'
+import { StorageService } from '../../../../services/storage.service';
+import { Validators } from '@angular/forms';
 
 
 export interface ZfsPoolData {
@@ -118,19 +120,38 @@ export class VolumesListTableConfig implements InputTableConf {
         actions.push({
           label: T("Lock"),
           onClick: (row1) => {
-            this.dialogService.confirm(T("Lock"), T("Proceed with locking the pool: ") + row1.name).subscribe((confirmResult) => {
-              if (confirmResult === true) {
-                this.loader.open();
-                this.rest.post(this.resource_name + "/" + row1.name + "/lock/", { body: JSON.stringify({}) }).subscribe((restPostResp) => {
-                  this.loader.close();
-                  this.parentVolumesListComponent.repaintMe();
+            let localLoader = this.loader,
+            localRest = this.rest,
+            localParentVol = this.parentVolumesListComponent,
+            localDialogService = this.dialogService,
+            localSnackBar = this.snackBar;
 
+            const conf: DialogFormConfiguration = {
+              title: "Lock " + row1.name,
+              fieldConfig: [{
+                type : 'input',
+                inputType: 'password',
+                name : 'passphrase',
+                placeholder: T('Passphrase'),
+                validation: [Validators.required],
+                required: true
+              }],
+              // required passphrase won't work w/o help from server side
+              saveButtonText: "Lock",
+              customSubmit: function (value) {
+                localLoader.open();
+                return localRest.post("storage/volume/" + row1.name + "/lock/", { body: JSON.stringify({passphrase: 
+                  value.passphrase}) }).subscribe((restPostResp) => {
+                  localLoader.close();
+                  localParentVol.repaintMe();     
+                  localSnackBar.open(row1.name + " has been locked.", 'close', { duration: 5000 });       
                 }, (res) => {
-                  this.loader.close();
-                  this.dialogService.errorReport(T("Error locking pool"), res.message, res.stack);
+                  localLoader.close();
+                  localDialogService.errorReport(T("Error locking pool"), res.message, res.stack);
                 });
               }
-            });
+            }
+            this.dialogService.dialogForm(conf);
           }
         });
 
