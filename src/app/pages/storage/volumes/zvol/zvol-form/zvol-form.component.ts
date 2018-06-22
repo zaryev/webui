@@ -399,7 +399,21 @@ export class ZvolFormComponent {
   }
 
   customSubmit(body: any) {
-   
+    let volsize = body['volsize'];
+    const unit = body['volsize_unit'];
+    // volsize must be an integer so convert floating point to nearest byte
+    if (volsize % 1 !== 0) {
+      if (unit === "G") {
+        volsize = volsize * 1024 * 1024 * 1024;
+      } else if (unit === "M") {
+        volsize = volsize * 1024 * 1024;
+      } else if (unit === "K") {
+        volsize = volsize * 1024;
+      }
+      body['volsize_unit'] = "B";
+      body['volsize'] = Math.round(volsize); 
+    }
+    console.log(body);
 
     this.loader.open();
 
