@@ -599,7 +599,7 @@ entity-form .form-card.mat-card{
   min-width: 100%;
 }
 
-@media screen and (max-width: 685px) {
+@media screen and (max-width: 1920px) {
 .form-explorer {
   @include variable(background, --bg1, $bg1);
 }
