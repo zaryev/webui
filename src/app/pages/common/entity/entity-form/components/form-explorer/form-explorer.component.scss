@@ -8,27 +8,14 @@
     top: 20px;
 }
 
-.flex-container {
-    display: flex;
-    flex-direction: column;
-}
-
 .form-explorer {
     padding: 10px;
     margin-bottom: 20px;
     width: 80%;
 }
 
-#box1 {
-    order: 1;
-}
 #box2 {
     margin-left: 0;
     margin-top: 8px;
     width: 100%;
-    order: 2;
-}
-
-#box3 {
-    order: 3;
 }
