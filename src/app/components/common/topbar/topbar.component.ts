@@ -16,6 +16,8 @@ import { Observable } from "rxjs/Observable";
 import { Subscription } from "rxjs/Subscription";
 import { TranslateService } from '@ngx-translate/core';
 import { EntityUtils } from '../../../pages/common/entity/utils';
+import { LayoutService } from '../../../services/layout.service';
+
 
 @Component({
   selector: 'topbar',
@@ -33,6 +35,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   interval: any;
 
+  layoutConf: any;
   continuosStreaming: Subscription;
   showReplication = false;
   showResilvering = false;
@@ -43,6 +46,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
   public createThemeLabel = "Create Theme";
 
   constructor(
+    private layout: LayoutService,
+
     public themeService: ThemeService,
     public core: CoreService,
     private router: Router,
@@ -59,6 +64,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
     protected loader: AppLoaderService, ) {}
 
   ngOnInit() {
+    this.layoutConf = this.layout.layoutConf;
+
     let theme = this.themeService.currentTheme();
     this.currentTheme = theme.name;
     this.core.register({observerClass:this,eventName:"ThemeListsChanged"}).subscribe((evt:CoreEvent) => {
@@ -125,8 +132,21 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.notificPanel.toggle();
   }
 
+  // toggleSidenav() {
+  //   this.sidenav.toggle();
+  // }
+
   toggleSidenav() {
-    this.sidenav.toggle();
+    console.log('Toggle SideNav');
+    console.log(this.layoutConf.sidebarStyle);
+    if(this.layoutConf.sidebarStyle === 'closed') {
+      return this.layout.publishLayoutChange({
+        sidebarStyle: 'full'
+      })
+    }
+    this.layout.publishLayoutChange({
+      sidebarStyle: 'closed'
+    })
   }
 
   toggleCollapse() {

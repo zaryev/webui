@@ -47,6 +47,7 @@ import { FormInputComponent } from './pages/common/entity/entity-form/components
 import { FormSelectComponent } from './pages/common/entity/entity-form/components/form-select/form-select.component';
 import { FormParagraphComponent } from './pages/common/entity/entity-form/components/form-paragraph/form-paragraph.component';
 import { EntityModule } from './pages/common/entity/entity.module';
+import { LayoutService } from './services/layout.service';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -79,6 +80,7 @@ export function createTranslateLoader(http: HttpClient) {
   ],
   declarations: [AppComponent, ConfirmDialog, ErrorDialog, InfoDialog, AboutModalDialog, ConsolePanelModalDialog, DownloadKeyModalDialog, SelectDialogComponent ],
   providers: [
+    LayoutService,
     RoutePartsService,
     NavigationService,
     AuthService,
