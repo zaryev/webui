@@ -1,4 +1,7 @@
-<mat-sidenav-container class="app-side-nav-container" ngClass.xs="xs" ngClass.sm="sm" ngClass.md="md" ngClass.lg="lg" ngClass.xl="xl">
+<mat-sidenav-container class="app-side-nav-container" ngClass.xs="xs" ngClass.sm="sm" ngClass.md="md" ngClass.lg="lg" ngClass.xl="xl"
+  ngClass="'sidebar-opened' : layoutConf.sidebarStyle !== 'closed' && layoutConf.navigationPos === 'side'"
+  ngClass="'sidebar-closed': layoutConf.sidebarStyle === 'closed'"
+>
   <!-- Main side navigation -->
   <mat-sidenav #sidenav [opened]="isSidenavOpen" mode="over" class="sidebar-panel">
     <div id="scroll-area" class="navigation-hold" fxLayout="column">

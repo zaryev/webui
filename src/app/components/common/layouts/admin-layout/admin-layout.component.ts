@@ -10,6 +10,8 @@ import * as domHelper from '../../../../helpers/dom.helper';
 import { ThemeService } from '../../../../services/theme/theme.service';
 import { LanguageService } from '../../../../services/language.service';
 import { ConsolePanelModalDialog } from '../../dialog/consolepanel/consolepanel-dialog.component';
+import { LayoutService } from '../../../../services/layout.service';
+
 import {UUID} from 'angular2-uuid';
 
 @Component({
@@ -34,6 +36,7 @@ export class AdminLayoutComponent implements OnInit, AfterViewChecked {
   freenasThemes;
 
   constructor(private router: Router,
+    private layout: LayoutService,
     public themeService: ThemeService,
     private media: ObservableMedia,
     protected rest: RestService,
