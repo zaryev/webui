@@ -44,6 +44,7 @@ export class DashboardComponent implements OnInit,OnDestroy {
   }
 
   ngOnDestroy(){
+    this.core.unregister({observerClass:this});
   }
 
   init(){

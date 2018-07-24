@@ -561,7 +561,7 @@ export class StatsService {
       console.warn("REMOVING LISTENER")
       console.log(obj);
     }
-    let messageList;
+    let messageList = []; // Avoid errors from this being undefined
      // Remove from sources
      for(let i = 0; i < this.sources.length; i++){
        for(let index = 0; index < this.sources[i].listeners.length; index++){
@@ -576,7 +576,7 @@ export class StatsService {
        }
      }
 
-     if(messageList.length == 0){
+     if(messageList && messageList.length == 0){
        this.stopBroadcast(messageList);
      }
   }
