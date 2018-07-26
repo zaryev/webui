@@ -506,12 +506,18 @@ export class StatsService {
       }
       
       let reg = source.listeners[i];
+      // if listener no longer exists
+      /*if(!reg || typeof reg === "undefined"){
+        console.warn("Listener no longer exists. Removing listener from list...")
+        source.listeners.splice(i, 1);
+        continue;
+      }*/
 
       if(source.bidirectional){
         source.keys = this.keysFromAvailable(source);
       }
       // Abort if data source not available
-      if(reg.key && source.keys.indexOf(reg.key) == -1){
+      if(reg && reg.key && source.keys.indexOf(reg.key) == -1){
         reg.message = null;
         continue;
       }
@@ -557,10 +563,11 @@ export class StatsService {
   }
 
   removeListener(obj:any){
-    if(this.debug){
+    //if(this.debug){
       console.warn("REMOVING LISTENER")
       console.log(obj);
-    }
+      console.log(this.sources);
+    //}
     let messageList = []; // Avoid errors from this being undefined
      // Remove from sources
      for(let i = 0; i < this.sources.length; i++){
@@ -571,6 +578,7 @@ export class StatsService {
            } else {
             messageList = this.messages;
            }
+           console.log(messageList);
            this.updateListeners(this.sources[i], this.sources[i].listeners[index]);
          }
        }
