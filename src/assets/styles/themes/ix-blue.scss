@@ -296,7 +296,7 @@ div.hopscotch-bubble .hopscotch-nav-button.next,
     background-color: map-get($md-accent, 500);
     color: black;
     @include variable(background, --accent, $accent, !important);
-    @include variable(color, #000, #000, !important);
+    @include variable(color, --accent-txt , #000, !important);
 }
 
 .mat-drawer,

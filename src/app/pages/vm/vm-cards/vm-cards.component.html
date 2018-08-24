@@ -141,7 +141,7 @@
 
 
         <div class="vm-controls">
-              <button *ngIf="cards[i].vm_type === 'Bhyve'" mat-button color="primary" [disabled]="(cards[i].state == 'stopped')" [matMenuTriggerFor]="appMenu">Connect</button>
+              <button *ngIf="cards[i].vm_type === 'Bhyve'" mat-raised-button color="primary" [disabled]="(cards[i].state == 'stopped')" [matMenuTriggerFor]="appMenu">Connect</button>
                 <mat-menu #appMenu="matMenu">
                   <button  mat-menu-item color="primary" [disabled]="(!cards[i].vnc || cards[i].state === 'stopped')" (click)="vnc(i)">VNC</button>
                   <button  mat-menu-item color="primary" [disabled]="(cards[i].state === 'stopped')" (click)="serial(i)">Serial</button>

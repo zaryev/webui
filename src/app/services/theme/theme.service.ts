@@ -257,7 +257,8 @@ export class ThemeService {
     this.core.emit({name:"ChangeThemePreference", data:theme.name});
   }
 
-  setCssVars(theme:Theme){ 
+  setCssVars(theme:Theme){
+    console.log("setting css variables...");
     let palette = Object.keys(theme);
 
     // Isolate palette colors
@@ -307,7 +308,7 @@ export class ThemeService {
     // Find a good threshold for when to have light text color
     if(brightest < 144){
       txtColor = "#ffffff"
-    } else if(brightest > 191) {
+    } else if(brightest > 164) {
       txtColor = "#333333"
     } else {
       // RGB averages between 144-197 are to be 
