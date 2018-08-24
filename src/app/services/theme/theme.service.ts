@@ -318,11 +318,11 @@ export class ThemeService {
     let props = this.hexToRGB(cssVar); 
 
     // Find the average value to determine brightness
-    let brightest = (props.rgb[0] + props.rgb[1] + props.rgb[2]) / 3;
+    let avg = (props.rgb[0] + props.rgb[1] + props.rgb[2]) / 3;
     // Find a good threshold for when to have light text color
-    if(brightest < 144){
+    if(Math.max(...props.rgb) < 225 || avg < 134){ 
       txtColor = "#ffffff"
-    } else if(brightest > 164) {
+    } else if(avg > 164 /*||  Math.max(...props.rgb) > 164*/) {
       txtColor = "#333333"
     } else {
       // RGB averages between 144-197 are to be 
