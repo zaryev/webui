@@ -16,7 +16,7 @@
   </mat-toolbar-row>
   <mat-divider></mat-divider>
   <mat-card-content style="margin-top:64px;" fxLayout="row wrap" fxLayoutAlign="space-between stretch">
-    <entity-form-embedded [data]="values" [target]="customThemeForm" [conf]="this" fxFlex="100" fxFlex.gt-md="50"></entity-form-embedded>
+    <entity-form-embedded *ngIf="values" [data]="values" [target]="customThemeForm" [conf]="this" fxFlex="100" fxFlex.gt-md="50"></entity-form-embedded>
     <!--<ng-template>-->
     <div id="theme-preview" fxFlex="100" fxFlex.gt-md="50">
       <mat-card>

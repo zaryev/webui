@@ -436,6 +436,8 @@ export class CustomThemeComponent implements OnInit, OnChanges, OnDestroy {
               this.router.navigate(['ui-preferences']);
           break;
           case "FormGroupValueChanged":
+            this.updatePreview(evt.data)
+            break;
           case "UpdatePreview":
             this.snapshot = {theme:evt.data, baseTheme:this.baseTheme}
             if(this.globalPreview){
@@ -444,6 +446,7 @@ export class CustomThemeComponent implements OnInit, OnChanges, OnDestroy {
             this.updatePreview(evt.data);
           break;
           default:
+            console.warn("Message received, but didn't meet any conditions in switch.");
           break;
         }
       });
@@ -485,12 +488,27 @@ export class CustomThemeComponent implements OnInit, OnChanges, OnDestroy {
 
     updatePreview(theme:Theme){
       let palette = Object.keys(theme);
-      palette.splice(0,5);
+      let ignored = ['name','label','labelSwatch','description', 'favorite'];
+      let isComplete: boolean = true;
+      //palette.splice(0,5);
 
       palette.forEach((color)=>{
-      let swatch = theme[color];
-      (<any>document).querySelector('#theme-preview').style.setProperty("--" + color, theme[color]);
+        if(ignored.indexOf(color) == -1){
+          let swatch = theme[color];
+          if(!swatch){
+            //console.warn("Palette color " + color + " is undefined...");
+            isComplete = false;
+          }
+        }
       });
+
+      // Abort if theme is not complete enough to preview
+      if(!isComplete){
+        //console.warn('Theme is not complete enough to preview')
+        return;
+      }
+      let args = {theme:theme, element:'#theme-preview'}
+      this.core.emit({name:"UpdateLocalPreview",data:args});
     }
 
     updateGlobal(snapshot?:FormSnapshot){

@@ -188,6 +188,14 @@ export class ThemeService {
       }
     });
 
+    this.core.register({observerClass:this,eventName:"UpdateLocalPreview"}).subscribe((evt:CoreEvent) => {
+      if(evt.data.element){
+        this.setCssVars(evt.data.theme, evt.data.element);
+      } else {
+        // Enforce element parameter so site theme doesn't get modified
+        console.warn("No target element provided. Can't update local preview.")
+      }
+    });
     this.core.register({observerClass:this,eventName:"GlobalPreviewChanged"}).subscribe((evt:CoreEvent) => {
       console.log("GlobalPreview callback")
       //this.globalPreview = !this.globalPreview;
@@ -257,8 +265,13 @@ export class ThemeService {
     this.core.emit({name:"ChangeThemePreference", data:theme.name});
   }
 
-  setCssVars(theme:Theme){
-    console.log("setting css variables...");
+  setCssVars(theme:Theme, element?: string){
+    let targetElement;
+    if(element){
+      targetElement = (<any>document).querySelector(element);
+    } else {
+      targetElement = (<any>document).documentElement;
+    }
     let palette = Object.keys(theme);
 
     // Isolate palette colors
@@ -270,23 +283,24 @@ export class ThemeService {
       // Generate aux. text styles 
       if(this.freenasThemes[0].accentColors.indexOf(color) !== -1){
         let txtColor = this.textContrast(theme[color], theme["bg2"]);
-        (<any>document).documentElement.style.setProperty("--" + color + "-txt", txtColor);
+        //(<any>document).documentElement.style.setProperty("--" + color + "-txt", txtColor);
+        targetElement.style.setProperty("--" + color + "-txt", txtColor);
       }
 
-      (<any>document).documentElement.style.setProperty("--" + color, theme[color]);
+      targetElement.style.setProperty("--" + color, theme[color]);
     });
 
     // Set Material palette colors
-    (<any>document).documentElement.style.setProperty("--primary",theme["primary"]);
-    (<any>document).documentElement.style.setProperty("--accent",theme["accent"]);
+    targetElement.style.setProperty("--primary",theme["primary"]);
+    targetElement.style.setProperty("--accent",theme["accent"]);
 
-    // Set Material aux. text styles
+    // Set Material aux. text styles for primary and accent
     let primaryColor = this.colorFromMeta(theme["primary"]); // eg. blue
     let accentColor = this.colorFromMeta(theme["accent"]); // eg. yellow
     let primaryTextColor = this.textContrast(theme[primaryColor], theme["bg2"]);
     let accentTextColor = this.textContrast(theme[accentColor], theme["bg2"]);
-    (<any>document).documentElement.style.setProperty("--primary-txt", /*'var(--' + primaryColor + '-txt)'*/primaryTextColor);
-    (<any>document).documentElement.style.setProperty("--accent-txt", /*'var(--' + accentColor + '-txt)'*/accentTextColor);
+    targetElement.style.setProperty("--primary-txt", /*'var(--' + primaryColor + '-txt)'*/primaryTextColor);
+    targetElement.style.setProperty("--accent-txt", /*'var(--' + accentColor + '-txt)'*/accentTextColor);
 
     // Logo light/dark
     if(theme["hasDarkLogo"]){
