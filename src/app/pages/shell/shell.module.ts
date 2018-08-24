@@ -14,6 +14,7 @@ import { TranslateModule } from '@ngx-translate/core';
   declarations: [
     ShellComponent
   ],
-  providers: []
+  providers: [],
+  exports:[ShellComponent]
 })
 export class ShellModule {}

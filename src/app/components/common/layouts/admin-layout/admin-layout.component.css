@@ -1,8 +1,24 @@
 .notification-sidenav {
-	min-width: 300px;
+	min-width: 550px;
 	max-width: 30%;
+        overflow-x: hidden;
 }
 .app-logo, .app-logo-text {
 	position: relative;
 	top: 13px;
 }
+
+mat-panel-title.mat-expansion-panel-header-title{
+  line-height:32px;
+}
+
+mat-panel-title mat-icon.mat-icon.mdi-set{
+  font-size: 150%;
+  margin-right: 6px;
+}
+
+:host ::ng-deep #shell .mat-expansion-panel-body{
+  padding:0;
+}
+
+

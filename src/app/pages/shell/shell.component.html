@@ -1,10 +1,10 @@
-<mat-card class="p-0">
-  <mat-card-title class="mat-bg-primary m-0">
+<mat-card class="p-0" [ngClass]="{fullscreen: !page}">
+  <mat-card-title *ngIf="page" class="mat-bg-primary m-0">
   	 <div class="card-title-text">
   	 	{{"Shell" | translate}}
   	 </div>
   </mat-card-title>
-	<div id="terminal" [ngStyle]="{'font-size' : font_size+'px'}"  #terminal (window:resize)="onResize($event)"></div>
+	<div *ngIf="page" id="terminal" [ngStyle]="{'font-size' : font_size+'px'}"  #terminal (window:resize)="onResize($event)"></div>
 	<mat-card-content *ngIf="shellConnected; else Reconnect">
 		<mat-divider class="mb-1"></mat-divider>
 		{{"Set font size" | translate}}: <mat-slider min="10" max="20" step="1" value="14"  [(ngModel)]="font_size"></mat-slider>
@@ -16,4 +16,5 @@
 			<button mat-button color="primary" (click)="reconnect()">{{"Reconnect" | translate}}</button>
 		</mat-card-content>
 	</ng-template>
+	<div *ngIf="!page" id="terminal" [ngStyle]="{'font-size' : font_size+'px'}"  #terminal (window:resize)="onResize($event)"></div>
 </mat-card>

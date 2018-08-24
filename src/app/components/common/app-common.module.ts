@@ -19,9 +19,10 @@ import {
   MatRadioModule,
   MatCheckboxModule,
   MatCardModule,
-  MatDialogModule
+  MatDialogModule,
+  MatExpansionModule
 } from '@angular/material';
-
+//import { ShellModule } from 'app/pages/shell/shell.module';
 import { ChartistModule } from 'ng-chartist';
 import { TopbarComponent } from './topbar/topbar.component';
 import { NavigationComponent } from './navigation/navigation.component';
@@ -60,6 +61,8 @@ import { AngularSvgIconModule } from 'angular-svg-icon';
     MatCheckboxModule,
     MatCardModule,
     MatDialogModule,
+    MatExpansionModule,
+    //ShellModule,
     CommonDirectivesModule,
     TranslateModule,
     ChartistModule,

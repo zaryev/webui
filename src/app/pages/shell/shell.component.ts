@@ -33,6 +33,7 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
   //xter container
   @ViewChild('terminal') container: ElementRef;
   // xterm variables
+  @Input() page:boolean = true;
   cols: string;
   rows: string;
   font_size: number;

@@ -2,3 +2,18 @@
   position: absolute !important;
   right: 20px;
 }
+
+/*.mat-card.fullscreen{
+  box-shadow:none;
+  margin:0;
+}
+.mat-card.fullscreen .mat-card-title{ 
+  display:none;
+}
+.mat-card.fullscreen .mat-card-content{
+  padding:0 1.5rem !important;
+  margin:0;
+}
+.fullscreen tooltip.shellTooltip{
+  margin-top:0.75rem;
+}*/

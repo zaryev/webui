@@ -305,7 +305,7 @@ export class ThemeService {
     // Find the average value to determine brightness
     let brightest = (props.rgb[0] + props.rgb[1] + props.rgb[2]) / 3;
     // Find a good threshold for when to have light text color
-    if(brightest < 144){
+    if(brightest < 104){
       txtColor = "#ffffff"
     } else if(brightest > 191) {
       txtColor = "#333333"
