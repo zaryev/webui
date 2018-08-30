@@ -1,0 +1,74 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+$md-primary: (
+    50 : #e1e7e8,
+    100 : #b5c3c6,
+    200 : #839ba1,
+    300 : #51727b,
+    400 : #2c545e,
+    500 : #073642,
+    600 : #06303c,
+    700 : #052933,
+    800 : #04222b,
+    900 : #02161d,
+    A100 : #5bc5ff,
+    A200 : #28b3ff,
+    A400 : #009ef4,
+    A700 : #008dda,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #ffffff,
+        400 : #ffffff,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #ffffff,
+        A700 : #ffffff,
+    )
+);
+
+$md-accent: (
+    50 : #f6f1e0,
+    100 : #e9dcb3,
+    200 : #dac480,
+    300 : #cbac4d,
+    400 : #c09b26,
+    500 : #b58900,
+    600 : #ae8100,
+    700 : #a57600,
+    800 : #9d6c00,
+    900 : #8d5900,
+    A100 : #ffe1b9,
+    A200 : #ffcb86,
+    A400 : #ffb553,
+    A700 : #ffaa3a,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #000000,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
+$freenas-primary: mat-palette($md-primary);
+$freenas-accent:  mat-palette($md-accent);
+
+$freenas-theme: mat-light-theme($freenas-primary, $freenas-accent);
+$primary-dark: darken( map-get($md-primary, 500), 8% );
