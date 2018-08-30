@@ -1,5 +1,6 @@
 @import '~@angular/material/theming';
 @include mat-core();
+@import './dracula';
 
 // Use CSS custom properties for palette colors
 // via this mixin.
@@ -47,71 +48,73 @@ $tooltip:'inline';//display property
 $logo: url('assets/images/light-logo.svg');
 $logo-text: url('assets/images/light-logo-text.svg');
 
-$md-primary: (
-    50 : #e0f2fa,
-    100 : #b3dff2,
-    200 : #80caea,
-    300 : #4db5e2,
-    400 : #26a5db,
-    500 : #0095d5,
-    600 : #008dd0,
-    700 : #0082ca,
-    800 : #0078c4,
-    900 : #0067ba,
-    A100 : #e3f1ff,
-    A200 : #b0d7ff,
-    A400 : #7dbdff,
-    A700 : #63b0ff,
-    contrast: (
-        50 : #000000,
-        100 : #000000,
-        200 : #000000,
-        300 : #000000,
-        400 : #000000,
-        500 : #ffffff,
-        600 : #ffffff,
-        700 : #ffffff,
-        800 : #ffffff,
-        900 : #ffffff,
-        A100 : #000000,
-        A200 : #000000,
-        A400 : #000000,
-        A700 : #000000,
-    )
-);
 
-$md-accent: (
-    50 : #fff8e1,
-    100 : #ffecb5,
-    200 : #ffe083,
-    300 : #ffd451,
-    400 : #ffca2c,
-    500 : #ffc107,
-    600 : #ffbb06,
-    700 : #ffb305,
-    800 : #ffab04,
-    900 : #ff9e02,
-    A100 : #ffffff,
-    A200 : #fffaf2,
-    A400 : #ffe4bf,
-    A700 : #ffd9a6,
-    contrast: (
-        50 : #000000,
-        100 : #000000,
-        200 : #000000,
-        300 : #000000,
-        400 : #000000,
-        500 : #000000,
-        600 : #000000,
-        700 : #000000,
-        800 : #000000,
-        900 : #000000,
-        A100 : #000000,
-        A200 : #000000,
-        A400 : #000000,
-        A700 : #000000,
-    )
-);
+
+// $md-primary: (
+//     50 : #e0f2fa,
+//     100 : #b3dff2,
+//     200 : #80caea,
+//     300 : #4db5e2,
+//     400 : #26a5db,
+//     500 : #0095d5,
+//     600 : #008dd0,
+//     700 : #0082ca,
+//     800 : #0078c4,
+//     900 : #0067ba,
+//     A100 : #e3f1ff,
+//     A200 : #b0d7ff,
+//     A400 : #7dbdff,
+//     A700 : #63b0ff,
+//     contrast: (
+//         50 : #000000,
+//         100 : #000000,
+//         200 : #000000,
+//         300 : #000000,
+//         400 : #000000,
+//         500 : #ffffff,
+//         600 : #ffffff,
+//         700 : #ffffff,
+//         800 : #ffffff,
+//         900 : #ffffff,
+//         A100 : #000000,
+//         A200 : #000000,
+//         A400 : #000000,
+//         A700 : #000000,
+//     )
+// );
+
+// $md-accent: (
+//     50 : #fff8e1,
+//     100 : #ffecb5,
+//     200 : #ffe083,
+//     300 : #ffd451,
+//     400 : #ffca2c,
+//     500 : #ffc107,
+//     600 : #ffbb06,
+//     700 : #ffb305,
+//     800 : #ffab04,
+//     900 : #ff9e02,
+//     A100 : #ffffff,
+//     A200 : #fffaf2,
+//     A400 : #ffe4bf,
+//     A700 : #ffd9a6,
+//     contrast: (
+//         50 : #000000,
+//         100 : #000000,
+//         200 : #000000,
+//         300 : #000000,
+//         400 : #000000,
+//         500 : #000000,
+//         600 : #000000,
+//         700 : #000000,
+//         800 : #000000,
+//         900 : #000000,
+//         A100 : #000000,
+//         A200 : #000000,
+//         A400 : #000000,
+//         A700 : #000000,
+//     )
+// );
 
 // mandatory stuff for theming
 $freenas-primary: mat-palette($md-primary);
@@ -658,9 +661,9 @@ entity-form .form-card.mat-card{
   @include variable(color, --fg2, $fg2, !important);
 }
 
-.mat-spinner circle {
-    @include variable(stroke, --primary, $primary, !important);
-}
+// .mat-spinner circle {
+//     @include variable(stroke, --primary, $primary, !important);
+// }
 
 // Add a visual effect when any sidenav menu item is clicked
 .highlight  {
@@ -668,15 +671,15 @@ entity-form .form-card.mat-card{
 }
 
 // Add rule for entity wizards to make text light on dark themes
-.ix-blue .mat-step-header .mat-step-label.mat-step-label-active, {
-  @include variable(color, --fg2, $fg2);
-  opacity: 1;
-}
+// .ix-blue .mat-step-header .mat-step-label.mat-step-label-active, {
+//   @include variable(color, --fg2, $fg2);
+//   opacity: 1;
+// }
 
-.ix-blue .mat-step-header .mat-step-label {
-  @include variable(color, --fg2, $fg2);
-  opacity: .38;
-}
+// .ix-blue .mat-step-header .mat-step-label {
+//   @include variable(color, --fg2, $fg2);
+//   opacity: .38;
+// }
 
  // Style file trees to be highlighted with a theme color
 .node-content-wrapper:hover,
@@ -698,34 +701,34 @@ entity-form .form-card.mat-card{
 }
 
 // style nav chevrons on datatable pager w/regard to theme
-.mat-button-wrapper .mat-paginator-decrement,
-.mat-button-wrapper .mat-paginator-increment {
-  @include variable(border-color, --fg1, $fg1);
-} 
+// .mat-button-wrapper .mat-paginator-decrement,
+// .mat-button-wrapper .mat-paginator-increment {
+//   @include variable(border-color, --fg1, $fg1);
+// } 
 
-.mat-icon-button:disabled .mat-button-wrapper .mat-paginator-decrement,
-.mat-icon-button:disabled .mat-button-wrapper .mat-paginator-increment {
-  @include variable(border-color, --fg1, $fg1);
-  opacity: .38;
-} 
+// .mat-icon-button:disabled .mat-button-wrapper .mat-paginator-decrement,
+// .mat-icon-button:disabled .mat-button-wrapper .mat-paginator-increment {
+//   @include variable(border-color, --fg1, $fg1);
+//   opacity: .38;
+// } 
 
 // style to make sure all radio buttons catch the theme color
-.ix-blue .mat-radio-button.mat-accent .mat-radio-inner-circle {
-  @include variable(background-color, --accent, $accent !important);
-}
+// .ix-blue .mat-radio-button.mat-accent .mat-radio-inner-circle {
+//   @include variable(background-color, --accent, $accent !important);
+// }
 
-.ix-blue .mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
-  @include variable(border-color, --accent, $accent !important);
-}
+// .ix-blue .mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+//   @include variable(border-color, --accent, $accent !important);
+// }
 
 // Fix icon color in notification area
 .notific-icon {
   @include variable(color, --primary, $primary !important);
 }
 
-.mat-spinner circle {
-  @include variable(stroke, --primary, $primary, !important);
-} 
+// .mat-spinner circle {
+//   @include variable(stroke, --primary, $primary, !important);
+// } 
 
 // Align button and tooltip on Add Replication form
 #repl_remote_hostkey button {
@@ -738,13 +741,13 @@ entity-form .form-card.mat-card{
 }
 
 // Theme color for slider (Shell page and elsewhere)
-.mat-slider {
-  @include variable(color, --accent, $accent, !important);
-}
+// .mat-slider {
+//   @include variable(color, --accent, $accent, !important);
+// }
 
-.mat-slider-track-fill, .mat-slider-thumb {
-  @include variable(background-color, --accent, $accent, !important);
-}
+// .mat-slider-track-fill, .mat-slider-thumb {
+//   @include variable(background-color, --accent, $accent, !important);
+// }
 
 // Fix a layout problem on Sharing/ISCSI page with ink-bar under active link...
 iscsi .mat-tab-label-active {
