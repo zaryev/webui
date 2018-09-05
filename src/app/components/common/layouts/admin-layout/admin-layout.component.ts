@@ -1,4 +1,5 @@
 import { RestService, WebSocketService } from '../../../../services';
+import { CoreService, CoreEvent } from 'app/core/services/core.service';
 import { Component, AfterViewChecked, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from "rxjs/Subscription";
@@ -26,6 +27,8 @@ export class AdminLayoutComponent implements OnInit, AfterViewChecked {
   consoleMsg: String = "";
   consoleMSgList: any[] = [];
   public is_freenas: Boolean = false;
+  public logoPath: string = 'assets/images/light-logo.svg';
+  public logoTextPath: string = 'assets/images/light-logo-text.svg';
   public currentTheme: string = "";
   // we will just have to add to this list as more languages are added
 
@@ -34,6 +37,7 @@ export class AdminLayoutComponent implements OnInit, AfterViewChecked {
   freenasThemes;
 
   constructor(private router: Router,
+    public core: CoreService,
     public themeService: ThemeService,
     private media: ObservableMedia,
     protected rest: RestService,
@@ -59,6 +63,17 @@ export class AdminLayoutComponent implements OnInit, AfterViewChecked {
 
     // Translator init
     language.getMiddlewareLanguage();
+
+    // Subscribe to Theme Changes
+    core.register({
+      observerClass:this, 
+      eventName:"ThemeChanged", 
+      sender:themeService
+    }).subscribe((evt:CoreEvent)=>{
+      let theme = evt.data;
+      this.logoPath = theme.logoPath;
+      this.logoTextPath = theme.logoTextPath;
+    });
   }
 
   ngOnInit() {
@@ -66,9 +81,14 @@ export class AdminLayoutComponent implements OnInit, AfterViewChecked {
     this.currentTheme = this.themeService.currentTheme().name;
     // Initialize Perfect scrollbar for sidenav
     let navigationHold = document.getElementById('scroll-area');
-    Ps.initialize(navigationHold, {
-      suppressScrollX: true
-    });
+
+    // Delay needed to fix a init err with navbar vert scroll
+    setTimeout(() => {
+      Ps.initialize(navigationHold, {
+        suppressScrollX: true
+      });
+    }, 500);
+
     if (this.media.isActive('xs') || this.media.isActive('sm')) {
       this.isSidenavOpen = false;
     }

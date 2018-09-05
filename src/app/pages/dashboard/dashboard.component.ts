@@ -1,6 +1,6 @@
-import { Component, AfterViewInit, ViewChild,OnDestroy } from '@angular/core';
-import { CoreService, CoreEvent } from '../../core/services/core.service';
-import { StatsService } from '../../services/stats.service';
+import { Component, OnInit, AfterViewInit, ViewChild,OnDestroy } from '@angular/core';
+import { CoreService, CoreEvent } from 'app/core/services/core.service';
+import { StatsService } from 'app/services/stats.service';
 
 import { Subject } from 'rxjs/Subject';
 import { WidgetComponent } from '../../core/components/widgets/widget/widget.component'; // POC
@@ -11,9 +11,10 @@ import {RestService,WebSocketService} from '../../services';
 
 @Component({
   selector: 'dashboard',
-  templateUrl:'./dashboard.html'
+  templateUrl:'./dashboard.html',
+  styleUrls: ['./dashboard.scss'],
 })
-export class DashboardComponent implements AfterViewInit,OnDestroy {
+export class DashboardComponent implements OnInit,OnDestroy {
  
   public large: string = "lg";
   public medium: string = "md";
@@ -28,6 +29,8 @@ export class DashboardComponent implements AfterViewInit,OnDestroy {
   public animation = "stop";
   public shake = false;
 
+  public showSpinner: boolean = true;
+
   constructor(protected core:CoreService, stats: StatsService){
     //this.core.emit({name:"StatsAddListener", data:{name:"CpuAggregate", key:"sum", obj:this }});
     //this.core.emit({name:"StatsAddListener", data:{name:"CpuAggregate", key:"average", obj:this }});
@@ -39,11 +42,12 @@ export class DashboardComponent implements AfterViewInit,OnDestroy {
 
   }
 
-  ngAfterViewInit(){
+  ngOnInit(){
     this.init();
   }
 
   ngOnDestroy(){
+    this.core.unregister({observerClass:this});
   }
 
   init(){
@@ -80,6 +84,7 @@ export class DashboardComponent implements AfterViewInit,OnDestroy {
 
       this.disks.push(disk);
     }
+    this.showSpinner = false;
   }
 
   setPoolData(evt:CoreEvent){
@@ -112,6 +117,7 @@ export class DashboardComponent implements AfterViewInit,OnDestroy {
         if(x > y){ return 1}
         return 0;
     });
+    // this.showSpinner = false;
   }
 
   toggleShake(){

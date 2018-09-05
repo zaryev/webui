@@ -18,6 +18,7 @@ import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-entity-dialog',
   templateUrl: './entity-dialog.component.html',
+  styles: [],
   providers: [EntityFormService, DatePipe]
 })
 export class EntityDialogComponent implements OnInit {
@@ -33,6 +34,8 @@ export class EntityDialogComponent implements OnInit {
   public getKeyButtonText: string;
   public error: string;
   public formValue: any;
+  public showPassword = false;
+  public parent: any;
   
 
   constructor(public dialogRef: MatDialogRef < EntityDialogComponent >,
@@ -48,6 +51,15 @@ export class EntityDialogComponent implements OnInit {
   ngOnInit() {
     this.title = this.conf.title;
     this.fieldConfig = this.conf.fieldConfig;
+    
+    if(this.conf.parent) {
+      this.parent = this.conf.parent;
+    }
+   
+
+    if (this.conf.preInit) {
+      this.conf.preInit(this);
+    }
 
     if (this.conf.saveButtonText) {
       this.saveButtonText = this.conf.saveButtonText;
@@ -96,5 +108,24 @@ export class EntityDialogComponent implements OnInit {
       this.fieldConfig[f].errors = '';
       this.fieldConfig[f].hasErrors = false;
     }
+  }
+
+  togglePW() {
+    let inputs = document.getElementsByTagName('input');
+    for (let i = 0; i < inputs.length; i++) {
+      if (!inputs[i].placeholder.toLowerCase().includes('current') && 
+          !inputs[i].placeholder.toLowerCase().includes('root')) {
+        if (inputs[i].placeholder.toLowerCase().includes('password') || 
+        inputs[i].placeholder.toLowerCase().includes('passphrase') ||
+        inputs[i].placeholder.toLowerCase().includes('secret')) {
+          if (inputs[i].type === 'password') {
+            inputs[i].type = 'text';
+          } else {
+            inputs[i].type = 'password';
+          }
+        }
+      }
+    }
+    this.showPassword = !this.showPassword;
   }
 }

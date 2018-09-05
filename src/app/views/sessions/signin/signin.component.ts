@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatProgressBar, MatButton, MatSnackBar } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../../translate-marker';
 
 import {WebSocketService} from '../../../services/ws.service';
 import { DialogService } from '../../../services/dialog.service';
@@ -18,6 +19,7 @@ export class SigninComponent implements OnInit {
   private failed: Boolean = false;
   public is_freenas: Boolean = false;
   public logo_ready: Boolean = false;
+  public showPassword = false;
 
   signinData = {
     username: '',
@@ -34,6 +36,13 @@ export class SigninComponent implements OnInit {
    }
 
   ngOnInit() {
+    if (window['MIDDLEWARE_TOKEN']) {
+      this.ws.login_token(window['MIDDLEWARE_TOKEN'])
+      .subscribe((result) => {
+        window['MIDDLEWARE_TOKEN'] = null;
+        this.loginCallback(result);
+       });
+    }
     if (this.ws.token && this.ws.redirectUrl) {
       if (this.submitButton) {
         this.submitButton.disabled = true;
@@ -90,12 +99,12 @@ export class SigninComponent implements OnInit {
     this.signinData.password = '';
     let message = '';
     if (this.ws.token === null) {
-      message = 'Username or Password is incorrect';
+      message = 'Username or Password is incorrect.';
     } else {
-      message = 'Token expired, please log back in';
+      message = 'Token expired, please log back in.';
       this.ws.token = null;
     }
-    this.translate.get('Ok').subscribe((ok: string) => {
+    this.translate.get('close').subscribe((ok: string) => {
       this.translate.get(message).subscribe((res: string) => {
         this.snackBar.open(res, ok, {duration: 4000});
       });
@@ -105,7 +114,7 @@ export class SigninComponent implements OnInit {
   onGoToLegacy() {
     this.translate.get('Switch to Legacy UI?').subscribe((gotolegacy: string) => {
       this.translate.get("Return to the previous graphical user interface.").subscribe((gotolegacy_prompt) => {
-        this.dialogService.confirm("Switch to Legacy UI?", "Return to the previous graphical user interface.", true).subscribe((res) => {
+        this.dialogService.confirm("Switch to Legacy UI?", "Return to the previous graphical user interface.", true, T('Switch')).subscribe((res) => {
           if (res) {
             window.location.href = '/legacy/';
           }
@@ -113,5 +122,4 @@ export class SigninComponent implements OnInit {
       });
     });
   }
-
 }

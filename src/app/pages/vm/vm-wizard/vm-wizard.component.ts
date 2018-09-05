@@ -1,19 +1,16 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { RestService, WebSocketService, NetworkService } from '../../../services';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { Wizard } from '../../common/entity/entity-form/models/wizard.interface';
 import { EntityWizardComponent } from '../../common/entity/entity-wizard/entity-wizard.component';
 import {MessageService} from '../../common/entity/entity-form/services/message.service';
 import * as _ from 'lodash';
 
-import { EntityUtils } from '../../common/entity/utils';
 import {VmService} from '../../../services/vm.service';
 import {regexValidator} from '../../common/entity/entity-form/validators/regex-validation';
-import { EntityJobComponent } from '../../common/entity/entity-job/entity-job.component';
 import { AppLoaderService } from '../../../services/app-loader/app-loader.service';
 import { MatDialog } from '@angular/material';
-import { validateBasis } from '@angular/flex-layout';
 import { T } from '../../../translate-marker';
 import { DialogService } from '../../../services/dialog.service';
 
@@ -105,7 +102,8 @@ export class VMWizardComponent {
       placeholder : T('Enable VNC'),
       tooltip : T('Enable a VNC (Virtual Network Computing) remote\
                    connection. Requires <i>UEFI</i> booting.'),
-      value: true
+      value: true,
+      isHidden: false
     }
       ]
     },
@@ -123,7 +121,6 @@ export class VMWizardComponent {
                       CPU limits the maximum. The VM operating system\
                       might also have operational or licensing\
                       restrictions on the number of CPUs.'),
-          required: true,
         },
         {
           type: 'input',
@@ -132,7 +129,11 @@ export class VMWizardComponent {
           inputType: 'number',
           min: 128,
           validation : [ Validators.required, Validators.min(128)],
-          tooltip: T('Allocate a number of mebibytes of RAM for the VM.'),
+          required: true,
+          blurStatus: true,
+          blurEvent: this.blurEvent2,
+          parent: this,
+          tooltip: T('Allocate a number of megabytes of RAM for the VM.'),
         },
       ]
     },
@@ -155,7 +156,7 @@ export class VMWizardComponent {
           type: 'input',
           name: 'volsize',
           placeholder : T('Define the size (GiB) for the zvol'),
-          tooltip: T('Allocate a number of gibibytes of space for the\
+          tooltip: T('Allocate a number of gigabytes of space for the\
                       new zvol.'),
           isHidden: false
         },
@@ -174,13 +175,12 @@ export class VMWizardComponent {
           explorerType: 'directory'
         },
         {
-          type: 'explorer',
+          type: 'select',
           name: 'hdd_path',
           placeholder: T('Select an existing disk'),
           tooltip: T('Browse to the desired pool or dataset on the disk.'),
-          explorerType: "zvol",
-          initial: '/mnt',
-          isHidden: true
+          isHidden: true,
+          options:[]
         },
       ]
     },
@@ -191,7 +191,7 @@ export class VMWizardComponent {
           name : 'NIC_type',
           placeholder : T('Adapter Type'),
           tooltip : T('<i>Intel e82545 (e1000)</i> emulates the same\
-                       Intel ethernet card. This provides compatibility\
+                       Intel Ethernet card. This provides compatibility\
                        with most operating systems. <i>VirtIO</i>\
                        provides better performance when the operating\
                        system installed in the VM supports VirtIO\
@@ -286,10 +286,30 @@ export class VMWizardComponent {
   }
   afterInit(entityWizard: EntityWizardComponent) {
 
+    this.ws.call("pool.dataset.query",[[["type", "=", "VOLUME"]]]).subscribe((zvols)=>{
+      zvols.forEach(zvol => {
+        _.find(this.wizardConfig[3].fieldConfig, {name : 'hdd_path'}).options.push(
+          {
+            label : zvol.id, value : zvol.id
+          }
+        );   
+      });
+    });
+
     ( < FormGroup > entityWizard.formArray.get([0]).get('wizard_type')).valueChanges.subscribe((res) => {
       if (res === 'docker') {
         this.router.navigate(new Array('/').concat(['vm','dockerwizard']))
       }
+    });
+
+    ( < FormGroup > entityWizard.formArray.get([1]).get('bootloader')).valueChanges.subscribe((bootloader) => {
+      if(bootloader === "UEFI_CSM"){
+        _.find(this.wizardConfig[1].fieldConfig, {name : 'enable_vnc'}).isHidden = true;
+      } else {
+        _.find(this.wizardConfig[1].fieldConfig, {name : 'enable_vnc'}).isHidden = false;
+      }
+
+
     });
 
 
@@ -302,27 +322,65 @@ export class VMWizardComponent {
         this.summary[T('Number of CPUs')] = vcpus;
       });
       ( < FormGroup > entityWizard.formArray.get([2])).get('memory').valueChanges.subscribe((memory) => {
-        this.summary[T('Memory')] = memory + ' Mib';
+        this.summary[T('Memory')] = memory + ' MiB';
       });
+
       ( < FormGroup > entityWizard.formArray.get([3])).get('volsize').valueChanges.subscribe((volsize) => {
         this.summary[T('Hard Disk Size')] = volsize + ' GiB';
       });
+
+      ( < FormGroup > entityWizard.formArray.get([3])).get('disk_radio').valueChanges.subscribe((disk_radio)=>{
+        if(this.summary[T('Hard Disk')] || this.summary[T('Hard Disk Size')]){
+          delete this.summary[T('Hard Disk')];
+          delete this.summary[T('Hard Disk Size')];
+        }
+        if(disk_radio) {
+          this.summary[T('Hard Disk Size')] = ( < FormGroup > entityWizard.formArray.get([3])).controls['volsize'].value + ' Gib';
+            ( < FormGroup > entityWizard.formArray.get([3])).get('volsize').valueChanges.subscribe((volsize) => {
+              this.summary[T('Hard Disk Size')] = volsize + ' GiB';
+            });
+        } else {
+          this.summary[T('Hard Disk')] = ( < FormGroup > entityWizard.formArray.get([3])).controls['hdd_path'].value;
+            ( < FormGroup > entityWizard.formArray.get([3])).get('hdd_path').valueChanges.subscribe((existing_hdd_path)=>{
+              this.summary[T('Hard Disk')] = existing_hdd_path;
+            })
+        }
+      });
+
       ( < FormGroup > entityWizard.formArray.get([5]).get('iso_path')).valueChanges.subscribe((iso_path) => {
         this.summary[T('Installation Media')] = iso_path;
       });
       this.messageService.messageSourceHasNewMessage$.subscribe((message)=>{
         ( < FormGroup > entityWizard.formArray.get([5]).get('iso_path')).setValue(message);
       })
-      if (res === 'Windows') {
-        ( < FormGroup > entityWizard.formArray.get([2])).controls['vcpus'].setValue(2);
-        ( < FormGroup > entityWizard.formArray.get([2])).controls['memory'].setValue(4096);
-        ( < FormGroup > entityWizard.formArray.get([3])).controls['volsize'].setValue(40);
-      }
-      else {
-        ( < FormGroup > entityWizard.formArray.get([2])).controls['vcpus'].setValue(1);
-        ( < FormGroup > entityWizard.formArray.get([2])).controls['memory'].setValue(512);
-        ( < FormGroup > entityWizard.formArray.get([3])).controls['volsize'].setValue(10);
-      }
+      this.ws.call('vm.get_available_memory').subscribe((available_memory)=>{
+        if (available_memory > 512 * 1024* 1024) {
+          if (res === 'Windows') {
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['vcpus'].setValue(2);
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['memory'].setValue(4096);
+            ( < FormGroup > entityWizard.formArray.get([3])).controls['volsize'].setValue(40);
+          }
+          else {
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['vcpus'].setValue(1);
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['memory'].setValue(512);
+            ( < FormGroup > entityWizard.formArray.get([3])).controls['volsize'].setValue(10);
+          }
+
+        } else {
+          if (res === 'Windows') {
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['vcpus'].setValue(2);
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['memory'].setValue(0);
+            ( < FormGroup > entityWizard.formArray.get([3])).controls['volsize'].setValue(40);
+          }
+          else {
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['vcpus'].setValue(1);
+            ( < FormGroup > entityWizard.formArray.get([2])).controls['memory'].setValue(0);
+            ( < FormGroup > entityWizard.formArray.get([3])).controls['volsize'].setValue(10);
+          }
+
+        }
+      })
+
     });
     ( < FormGroup > entityWizard.formArray.get([3]).get('disk_radio')).valueChanges.subscribe((res) => {
       if (res){
@@ -403,10 +461,23 @@ export class VMWizardComponent {
 }
 blurEvent(parent){
   const vm_name = parent.entityWizard.formGroup.value.formArray[1].name
-  parent.ws.call('vm.query', [[["name","=",vm_name],["vm_type", "=", "Bhyve"]]]).subscribe((vm_wizard_res)=>{
+  parent.ws.call('vm.query', [[["name","=",vm_name]]]).subscribe((vm_wizard_res)=>{
     if(vm_wizard_res.length > 0){
-      parent.dialogService.Info("Error", `virtual machine ${vm_wizard_res[0].name} already exists, please use a different name`).subscribe(()=>{
+      parent.dialogService.Info("Error", `Virtual machine ${vm_wizard_res[0].name} already exists.`).subscribe(()=>{
         parent.entityWizard.formArray.get([1]).get('name').setValue("");
+      })
+
+    }
+  })
+}
+
+blurEvent2(parent){
+  const vm_memory_requested = parent.entityWizard.formGroup.value.formArray[2].memory
+  const vm_name = parent.entityWizard.formGroup.value.formArray[1].name
+  parent.ws.call('vm.get_available_memory').subscribe((vm_memory_available)=>{
+    if( vm_memory_requested *1024*1024> vm_memory_available){
+      parent.dialogService.Info("Error", `Cannot allocate ${vm_memory_requested} Mib to virtual machine: ${vm_name}.`).subscribe(()=>{
+        parent.entityWizard.formArray.get([2]).get('memory').setValue(0);
       })
 
     }
@@ -438,14 +509,14 @@ async customSubmit(value) {
       {"dtype": "DISK", "attributes": {"path": hdd, "type": "AHCI", "sectorsize": 0}},
       {"dtype": "CDROM", "attributes": {"path": value.iso_path}},
     ]
-    if(value.enable_vnc){
+    if(value.enable_vnc &&value.bootloader !== "UEFI_CSM"){
       await this.create_vnc_device(vm_payload);
     };
     this.loader.open();
     if( value.hdd_path ){
       for (const device of vm_payload["devices"]){
         if (device.dtype === "DISK"){
-          device.attributes.path = '/dev/zvol/'+ value.hdd_path.substring(5);
+          device.attributes.path = '/dev/zvol/'+ value.hdd_path;
         };
       };
       this.ws.call('vm.create', [vm_payload]).subscribe(vm_res => {
@@ -453,12 +524,12 @@ async customSubmit(value) {
         this.router.navigate(['/vm']);
     },(error) => {
       this.loader.close();
-      this.dialogService.errorReport(T("Error creating VM"), error.reason, error.trace.formatted);
+      this.dialogService.errorReport(T("Error creating VM."), error.reason, error.trace.formatted);
     });
 
     } else {
       for (const device of vm_payload["devices"]){
-        if (device.dtype === "DISK"){
+        if (device.dtype === "DISK"){          
           const orig_hdd = device.attributes.path;
           const create_zvol = zvol_payload['create_zvol']
           const zvol_name = zvol_payload['zvol_name']
@@ -477,7 +548,7 @@ async customSubmit(value) {
         this.router.navigate(['/vm']);
       },(error) => {
         this.loader.close();
-        this.dialogService.errorReport(T("Error creating VM"), error.reason, error.trace.formatted);
+        this.dialogService.errorReport(T("Error creating VM."), error.reason, error.trace.formatted);
       });
     }
 }

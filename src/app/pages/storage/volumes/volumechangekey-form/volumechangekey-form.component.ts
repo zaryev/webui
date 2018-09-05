@@ -49,6 +49,7 @@ export class VolumeChangekeyFormComponent implements Formconfiguration {
     },{
       type : 'input',
       inputType: 'password',
+      togglePw : true,
       name : 'adminpw',
       placeholder: T('Root Password'),
       tooltip: T('Enter the root password.'),
@@ -61,7 +62,7 @@ export class VolumeChangekeyFormComponent implements Formconfiguration {
       placeholder: T('Passphrase'),
       tooltip: T('Enter the GELI passphrase.'),
       validation: [Validators.required],
-      required: true
+      required: true,
     },{
       type : 'input',
       inputType: 'password',
@@ -99,13 +100,13 @@ export class VolumeChangekeyFormComponent implements Formconfiguration {
     this.loader.open();
     return this.rest.put(this.resource_name + "/" + value.name + "/keypassphrase/", { body: JSON.stringify({adminpw: value.adminpw, passphrase: value.passphrase, passphrase2: value.passphrase2}) }).subscribe((restPostResp) => {
       this.loader.close();
-      this.dialogService.Info(T("Change Pool Passphrase"), T("Successfully changed passphrase for pool ") + value.name);
+      this.dialogService.Info(T("Change Pool Passphrase"), T("Passphrase changed for pool ") + value.name);
 
       this.router.navigate(new Array('/').concat(
         this.route_success));
     }, (res) => {
       this.loader.close();
-      this.dialogService.errorReport(T("Error changing passphrase for pool"), res.error.message, res.error.traceback);
+      this.dialogService.errorReport(T("Error changing passphrase for pool ") + value.name, res.error.message, res.error.traceback);
     });
   }
 

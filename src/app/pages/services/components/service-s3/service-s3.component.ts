@@ -59,7 +59,9 @@ export class ServiceS3Component implements OnDestroy {
       name : 'bindport',
       placeholder : T('Port'),
       tooltip: T('Enter the TCP port which provides the S3 service.'),
-      value: '9000'
+      value: '9000',
+      required: true,
+      validation: [Validators.min(1), Validators.max(65535), Validators.required, Validators.pattern(/^[1-9]\d*$/)]
     },
     {
       type : 'input',
@@ -74,6 +76,7 @@ export class ServiceS3Component implements OnDestroy {
       type : 'input',
       name : 'secret_key',
       placeholder : T('Secret Key'),
+      togglePw: true,
       tooltip: T('Enter the password that must be used by connecting S3\
                   systems.'),
       inputType : 'password',
@@ -144,8 +147,8 @@ export class ServiceS3Component implements OnDestroy {
       if(res && res.split('/').length < 4) {
         this.dialog.confirm(T("Warning"), T("Assigning a directory to Minio changes the permissions \
                                              of that directory and every directory in it to \
-                                             minio:minio, overriding any previous permissions. \
-                                             Creating a separate dataset just for Minio is strongly \
+                                             minio:minio and overrides any previous permissions. \
+                                             Creating a separate dataset for Minio is strongly \
                                              recommended."), true);
       }
     });

@@ -5,8 +5,9 @@ import * as _ from 'lodash';
 
 import { EntityFormComponent } from '../../../common/entity/entity-form';
 import { AppLoaderService } from '../../../../services/app-loader/app-loader.service';
-import { WebSocketService } from '../../../../services';
-import { DialogService } from '../../../../services';
+import { WebSocketService } from '../../../../services/';
+import { DialogService } from '../../../../services/';
+import { EntityUtils } from '../../../common/entity/utils';
 
 import { JailService } from '../../../../services';
 import { FieldConfig } from '../../../common/entity/entity-form/models/field-config.interface';
@@ -160,6 +161,11 @@ export class StorageFormComponent {
     let value = _.cloneDeep(this.formGroup.value);
     let mountPoint: MountPoint;
 
+    let destination_field = _.find(this.fieldConfig, { 'name': 'destination' });
+    if (_.startsWith(value['destination'], destination_field.initial)) {
+      value['destination'] = value['destination'].substring(destination_field.initial.length);
+    }
+
     if (this.mountpointId) {
       //edit mode
       this.mountPointEdit.source = value['source'];
@@ -194,7 +200,7 @@ export class StorageFormComponent {
       },
       (res) => {
         this.loader.close();
-        this.dialog.errorReport(res.error, res.reason, res.trace.formatted);
+        new EntityUtils().handleWSError(this, res);
       }
     );
   }

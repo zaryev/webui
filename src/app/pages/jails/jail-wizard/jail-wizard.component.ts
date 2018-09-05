@@ -4,6 +4,8 @@ import { RestService, WebSocketService } from '../../../services';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Wizard } from '../../common/entity/entity-form/models/wizard.interface';
 import { EntityWizardComponent } from '../../common/entity/entity-wizard/entity-wizard.component';
+import { MatDialog, MatDialogRef } from '@angular/material';
+import { EntityJobComponent } from '../../common/entity/entity-job/entity-job.component';
 import * as _ from 'lodash';
 import { JailService, NetworkService, DialogService } from '../../../services';
 import { EntityUtils } from '../../common/entity/utils';
@@ -89,13 +91,7 @@ export class JailWizardComponent {
           name: 'ip4_interface',
           placeholder: T('IPv4 interface'),
           tooltip: T('IPv4 interface for the jail.'),
-          options: [
-            {
-              label: 'vnet0',
-              value: 'vnet0',
-            }
-          ],
-          value: 'vnet0',
+          options: [],
           relation: [{
             action: 'DISABLE',
             when: [{
@@ -171,13 +167,7 @@ export class JailWizardComponent {
           name: 'ip6_interface',
           placeholder: T('IPv6 Interface'),
           tooltip: T('IPv6 interface for the jail.'),
-          options: [
-            {
-              label: 'vnet0',
-              value: 'vnet0',
-            }
-          ],
-          value: 'vnet0',
+          options: [],
           class: 'inline',
           width: '30%',
         },
@@ -219,6 +209,7 @@ export class JailWizardComponent {
   protected ip4_netmaskField: any;
   protected ip6_interfaceField: any;
   protected ip6_prefixField: any;
+  protected dialogRef: any;
 
   public ipv4: any;
   public ipv6: any;
@@ -227,6 +218,7 @@ export class JailWizardComponent {
               protected jailService: JailService,
               protected router: Router,
               protected networkService: NetworkService,
+              protected dialog: MatDialog,
               protected dialogService: DialogService) {
 
   }
@@ -255,11 +247,11 @@ export class JailWizardComponent {
                 }
               },
               (res_remote) => {
-                this.dialogService.errorReport(T('Error: Get remote release choices failed'), res_remote.reason, res_remote.trace.formatted);
+                this.dialogService.errorReport(T('Error: Fetching remote release choices failed.'), res_remote.reason, res_remote.trace.formatted);
               });
           },
           (res_local) => {
-            this.dialogService.errorReport(T('Error: Get local fetched release choices failed'), res_local.reason, res_local.trace.formatted);
+            this.dialogService.errorReport(T('Error: Displaying local fetched releases failed.'), res_local.reason, res_local.trace.formatted);
           });
       },
       (res) => {
@@ -375,10 +367,21 @@ export class JailWizardComponent {
     });
     ( < FormGroup > entityWizard.formArray.get([1]).get('vnet')).valueChanges.subscribe((res) => {
       this.summary[T('VNET Virtual Networking')] = res ? T('Yes') : T('No');
+      if (res) {
+        if (!_.find(this.ip4_interfaceField.options, { label: 'vnet0'})) {
+          this.ip4_interfaceField.options.push({ label: 'vnet0', value: 'vnet0'});
+        }
+        if (!_.find(this.ip6_interfaceField.options, { label: 'vnet0'})) {
+          this.ip6_interfaceField.options.push({ label: 'vnet0', value: 'vnet0'});
+        }
+      } else {
+        this.ip4_interfaceField.options.pop({ label: 'vnet0', value: 'vnet0'});
+        this.ip6_interfaceField.options.pop({ label: 'vnet0', value: 'vnet0'});
+      }
 
       if (( < FormGroup > entityWizard.formArray.get([1])).controls['dhcp'].value && !res) {
         _.find(this.wizardConfig[1].fieldConfig, { 'name': 'vnet' }).hasErrors = true;
-        _.find(this.wizardConfig[1].fieldConfig, { 'name': 'vnet' }).errors = 'Vnet is required';
+        _.find(this.wizardConfig[1].fieldConfig, { 'name': 'vnet' }).errors = 'VNET is required.';
       } else {
         _.find(this.wizardConfig[1].fieldConfig, { 'name': 'vnet' }).hasErrors = false;
         _.find(this.wizardConfig[1].fieldConfig, { 'name': 'vnet' }).errors = '';
@@ -423,6 +426,21 @@ export class JailWizardComponent {
     value['props'] = property;
 
     return value;
+  }
+
+  customSubmit(value) {
+    this.dialogRef = this.dialog.open(EntityJobComponent, { data: { "title": T("Creating Jail") }, disableClose: true});
+    this.dialogRef.componentInstance.setDescription(T("Creating Jail..."));
+    this.dialogRef.componentInstance.setCall(this.addWsCall, [value]);
+    this.dialogRef.componentInstance.submit();
+    this.dialogRef.componentInstance.success.subscribe((res) => {
+      this.dialogRef.close(true);
+      this.router.navigate(new Array('/').concat(this.route_success));
+    });
+    this.dialogRef.componentInstance.failure.subscribe((res) => {
+      this.dialogRef.close();
+      new EntityUtils().handleWSError(this, res, this.dialogService);
+    });
   }
 
   isCustActionVisible(id, stepperIndex) {

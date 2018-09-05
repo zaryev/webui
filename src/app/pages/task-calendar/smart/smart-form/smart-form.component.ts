@@ -57,12 +57,12 @@ export class SmartFormComponent {
         type: 'input',
         name: 'smarttest_desc',
         placeholder: T('Short description'),
-        tooltip : T('Optional. Describe this test.'),
+        tooltip : T('Enter a description of the S.M.A.R.T. test.'),
       },
       {
         type: 'scheduler',
         name: 'smarttest_picker',
-        placeholder: T('Schedule a Cron Job'),
+        placeholder: T('Schedule the S.M.A.R.T. Test'),
         tooltip: T('Choose one of the convenient presets\
           or choose <b>Custom</b> to trigger the advanced scheduler UI'),
         validation: [ Validators.required ],

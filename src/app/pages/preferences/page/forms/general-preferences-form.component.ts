@@ -1,4 +1,4 @@
-import { ApplicationRef, Input, Output, EventEmitter, Component, Injector, OnInit, ViewContainerRef, OnChanges } from '@angular/core';
+import { ApplicationRef, Input, Output, EventEmitter, Component, Injector, OnInit, ViewContainerRef, OnChanges, OnDestroy } from '@angular/core';
 import { NgModel }   from '@angular/forms';
 import {Router} from '@angular/router';
 import * as _ from 'lodash';
@@ -15,7 +15,7 @@ import { Subject } from 'rxjs/Subject';
   selector : 'general-preferences-form',
   template:`<entity-form-embedded fxFlex="100" fxFlex.gt-xs="300px" [target]="target" [data]="values" [conf]="this"></entity-form-embedded>`
 })
-export class GeneralPreferencesFormComponent implements OnInit, OnChanges {
+export class GeneralPreferencesFormComponent implements OnInit, OnChanges, OnDestroy {
 
   /*
    //Preferences Object Structure
@@ -72,6 +72,15 @@ export class GeneralPreferencesFormComponent implements OnInit, OnChanges {
             value:this.prefs.preferences.showTooltips,
             tooltip: 'This option enables/disables tooltips in forms.',
             class:'inline'
+          },
+          { 
+            type: 'checkbox', 
+            name: 'allowPwToggle', 
+            width: '300px',
+            placeholder: 'Enable Password Toggle',
+            value:this.prefs.preferences.allowPwToggle,
+            tooltip: 'This option enables/disables a password toggle button.',
+            class:'inline'
           }
         ]
       }
@@ -104,6 +113,10 @@ export class GeneralPreferencesFormComponent implements OnInit, OnChanges {
       if(changes.baseTheme){
         alert("baseTheme Changed!")
       }
+    }
+
+    ngOnDestroy(){
+      this.core.unregister({observerClass:this});
     }
 
     init(){

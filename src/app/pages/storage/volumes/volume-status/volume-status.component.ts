@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { DialogFormConfiguration } from '../../../common/entity/entity-dialog/dialog-form-configuration.interface';
 import { MatSnackBar } from '@angular/material';
 import { Validators } from '@angular/forms';
+import { T } from '../../../../translate-marker';
 
 interface poolDiskInfo {
   id: number,
@@ -143,7 +144,7 @@ export class VolumeStatusComponent implements OnInit {
         },
         isHidden: false,
       }, {
-        label: "Offline",
+        label: T("Offline"),
         onClick: (row) => {
           let name = row.name;
           // if use path as name, show the full path
@@ -152,7 +153,7 @@ export class VolumeStatusComponent implements OnInit {
           }
           this.dialogService.confirm(
             "Offline",
-            "Are you sure you want to offline the disk " + name,
+            "Offline disk " + name + "?", false, T('Offline')
           ).subscribe((res) => {
             if (res) {
               this.loader.open();
@@ -177,8 +178,8 @@ export class VolumeStatusComponent implements OnInit {
         label: "Online",
         onClick: (row) => {
           this.dialogService.confirm(
-            "Offline",
-            "Are your sure you want to online the disk " + _.split(row.name, 'p')[0],
+            "Online",
+            "Online disk " + _.split(row.name, 'p')[0] + "?", false, T('Online')
           ).subscribe((res) => {
             if (res) {
               this.loader.open();
@@ -212,7 +213,7 @@ export class VolumeStatusComponent implements OnInit {
           this.dialogService.dialogForm(conf).subscribe((res) => {
             if (res) {
               this.getData();
-              this.snackBar.open("Disk replacement has been initiated.", 'close', { duration: 5000 });
+              this.snackBar.open("Disk replacement started.", 'close', { duration: 5000 });
             }
           });
         },
@@ -222,7 +223,7 @@ export class VolumeStatusComponent implements OnInit {
         onClick: (row) => {
           this.dialogService.confirm(
             "Remove",
-            "Are your sure you want to remove the disk " + _.split(row.name, 'p')[0],
+            "Remove disk " + _.split(row.name, 'p')[0] + "?", false, T('Remove')
           ).subscribe((res) => {
             if (res) {
               this.loader.open();

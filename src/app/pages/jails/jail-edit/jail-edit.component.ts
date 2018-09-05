@@ -41,7 +41,6 @@ export class JailEditComponent implements OnInit {
       type: 'input',
       name: 'host_hostuuid',
       placeholder: T('UUID'),
-      disabled: true,
       tooltip: T('The numeric <i>UUID</i> or <i>custom name</i> of the \
                  jail.'),
       required: true,
@@ -91,13 +90,7 @@ export class JailEditComponent implements OnInit {
       name: 'ip4_interface',
       placeholder: T('IPv4 interface'),
       tooltip: T('IPv4 interface for the jail.'),
-      options: [
-        {
-          label: 'vnet0',
-          value: 'vnet0',
-        }
-      ],
-      value: 'vnet0',
+      options: [],
       relation: [{
         action: 'DISABLE',
         when: [{
@@ -185,13 +178,7 @@ export class JailEditComponent implements OnInit {
       name: 'ip6_interface',
       placeholder: T('IPv6 Interface'),
       tooltip: T('IPv6 interface for the jail.'),
-      options: [
-        {
-          label: 'vnet0',
-          value: 'vnet0',
-        }
-      ],
-      value: 'vnet0',
+      options: [],
       class: 'inline',
       width: '30%',
     },
@@ -1120,13 +1107,6 @@ export class JailEditComponent implements OnInit {
   protected ip6_interfaceField: any;
   protected ip6_prefixField: any;
 
-  public exception_error: boolean = false;
-  public exception_error_message = T("Not able to edit dhcp, jail_zfs or template while jails is running. \
-                                      Please stop jail first.");
-  protected pk_dhcp: any;
-  protected pk_jail_zfs: any;
-  protected pk_template: any;
-
   constructor(protected router: Router,
     protected aroute: ActivatedRoute,
     protected jailService: JailService,
@@ -1170,7 +1150,7 @@ export class JailEditComponent implements OnInit {
       });
     },
     (res) => {
-      new EntityUtils().handleError(this, res);
+      new EntityUtils().handleWSError(this, res, this.dialogService);
     });
 
     this.ip4_interfaceField = _.find(this.basicfieldConfig, {'name': 'ip4_interface'});
@@ -1195,7 +1175,7 @@ export class JailEditComponent implements OnInit {
         }
       },
       (res)=>{
-        new EntityUtils().handleError(this, res);
+        new EntityUtils().handleWSError(this, res, this.dialogService);
       }
     );
 
@@ -1219,12 +1199,23 @@ export class JailEditComponent implements OnInit {
         _.find(this.basicfieldConfig, { 'name': 'vnet' }).required = false;
          _.find(this.basicfieldConfig, { 'name': 'bpf' }).required = false;
       }
-      this.getExceptionError('dhcp', res);
     });
     this.formGroup.controls['vnet'].valueChanges.subscribe((res) => {
+      if (res) {
+        if (!_.find(this.ip4_interfaceField.options, { label: 'vnet0'})) {
+          this.ip4_interfaceField.options.push({ label: 'vnet0', value: 'vnet0'});
+        }
+        if (!_.find(this.ip6_interfaceField.options, { label: 'vnet0'})) {
+          this.ip6_interfaceField.options.push({ label: 'vnet0', value: 'vnet0'});
+        }
+      } else {
+        this.ip4_interfaceField.options.pop({ label: 'vnet0', value: 'vnet0'});
+        this.ip6_interfaceField.options.pop({ label: 'vnet0', value: 'vnet0'});
+      }
+
       if (this.formGroup.controls['dhcp'].value && !res) {
         _.find(this.basicfieldConfig, { 'name': 'vnet' }).hasErrors = true;
-        _.find(this.basicfieldConfig, { 'name': 'vnet' }).errors = 'Vnet is required';
+        _.find(this.basicfieldConfig, { 'name': 'vnet' }).errors = 'VNET is required.';
       } else {
         _.find(this.basicfieldConfig, { 'name': 'vnet' }).hasErrors = false;
         _.find(this.basicfieldConfig, { 'name': 'vnet' }).errors = '';
@@ -1233,7 +1224,7 @@ export class JailEditComponent implements OnInit {
     this.formGroup.controls['bpf'].valueChanges.subscribe((res) => {
       if (this.formGroup.controls['dhcp'].value && !res) {
         _.find(this.basicfieldConfig, { 'name': 'bpf' }).hasErrors = true;
-        _.find(this.basicfieldConfig, { 'name': 'bpf' }).errors = 'BPF is required';
+        _.find(this.basicfieldConfig, { 'name': 'bpf' }).errors = 'BPF is required.';
       } else {
         _.find(this.basicfieldConfig, { 'name': 'bpf' }).hasErrors = false;
         _.find(this.basicfieldConfig, { 'name': 'bpf' }).errors = '';
@@ -1253,13 +1244,6 @@ export class JailEditComponent implements OnInit {
         this.ip6_prefixField.required = true;
       }
     });
-
-    this.formGroup.controls['jail_zfs'].valueChanges.subscribe((res) => {
-      this.getExceptionError('jail_zfs', res);
-    })
-    // this.formGroup.controls['template'].valueChanges.subscribe((res) => {
-    //   this.getExceptionError('template', res);
-    // })
 
     this.aroute.params.subscribe(params => {
       this.pk = params['pk'];
@@ -1296,44 +1280,33 @@ export class JailEditComponent implements OnInit {
               _.find(this.basicfieldConfig, { 'name': 'release' }).options.push({ label: res[0][i], value: res[0][i] });
               this.currentReleaseVersion = Number(_.split(res[0][i], '-')[0]);
             }
-            if (_.indexOf(this.TFfields, i) > 0) {
+            if (_.indexOf(this.TFfields, i) > -1) {
               if (res[0][i] == '1') {
                 res[0][i] = true;
               } else {
                 res[0][i] = false;
               }
             }
-            if (_.indexOf(this.OFfields, i) > 0) {
+            if (_.indexOf(this.OFfields, i) > -1) {
               if (res[0][i] == 'on') {
                 res[0][i] = true;
               } else {
                 res[0][i] = false;
               }
             }
-            if (_.indexOf(this.YNfields, i) > 0) {
+            if (_.indexOf(this.YNfields, i) > -1) {
               if (res[0][i] == 'yes') {
                 res[0][i] = true;
               } else {
                 res[0][i] = false;
               }
             }
-
-            if (i == 'dhcp') {
-              this.pk_dhcp = res[0][i];
-            }
-            if (i == 'jail_zfs') {
-              this.pk_jail_zfs = res[0][i];
-            }
-            // if (i == 'template') {
-            //   this.pk_template = res[0][i];
-            // }
-
             this.formGroup.controls[i].setValue(res[0][i]);
           }
         }
       },
       (res) => {
-        new EntityUtils().handleError(this, res);
+        new EntityUtils().handleWSError(this, res, this.dialogService);
       });
     });
 
@@ -1386,13 +1359,15 @@ export class JailEditComponent implements OnInit {
     let newRelease: any;
     let value = _.cloneDeep(this.formGroup.value);
 
-    if (value['ip4_addr'] == '') {
-      value['ip4_addr'] = 'none';
-    } else {
-      value['ip4_addr'] = value['ip4_interface'] + '|' + value['ip4_addr'] + '/' + value['ip4_netmask'];
+    if (value['ip4_addr']) {
+      if (value['ip4_addr'] == '') {
+        value['ip4_addr'] = 'none';
+      } else {
+        value['ip4_addr'] = value['ip4_interface'] + '|' + value['ip4_addr'] + '/' + value['ip4_netmask'];
+      }
+      delete value['ip4_interface'];
+      delete value['ip4_netmask'];
     }
-    delete value['ip4_interface'];
-    delete value['ip4_netmask'];
     if (value['ip6_addr'] == '') {
       value['ip6_addr'] = 'none';
     } else {
@@ -1435,14 +1410,24 @@ export class JailEditComponent implements OnInit {
       }
     }
 
+    if (value['host_hostuuid']) {
+      if (this.wsResponse['type'] == 'jail') {
+        value['plugin'] = false;
+      } else {
+        value['plugin'] = true;
+      }
+      value['name'] = value['host_hostuuid'];
+      delete value['host_hostuuid'];
+    }
+
     this.loader.open();
 
     this.ws.call(this.updateCall, [this.pk, value]).subscribe(
       (res) => {
-        this.loader.close();
         if (updateRelease) {
           this.ws.job(this.upgradeCall, [this.pk, newRelease]).subscribe(
             (res_upgrade) => {
+              this.loader.close();
               if (res_upgrade.error) {
                 this.error = res_upgrade.error;
               } else {
@@ -1450,10 +1435,12 @@ export class JailEditComponent implements OnInit {
               }
             },
             (res_upgrate) => {
-              new EntityUtils().handleError(this, res_upgrate);
+              this.loader.close();
+              new EntityUtils().handleWSError(this, res_upgrate, this.dialogService);
             }
           );
         } else {
+          this.loader.close();
           if (res.error) {
             this.error = res.error;
           } else {
@@ -1463,7 +1450,7 @@ export class JailEditComponent implements OnInit {
       },
       (res) => {
         this.loader.close();
-        this.dialogService.errorReport('Error ' + res.error + ':' + res.reason, res.trace.class, res.trace.formatted);
+        new EntityUtils().handleWSError(this, res, this.dialogService);
       }
     );
   }
@@ -1480,17 +1467,4 @@ export class JailEditComponent implements OnInit {
     this.step--;
   }
 
-  getExceptionError(key, value) {
-    if (this.wsResponse.state == 'up') {
-      if (key == 'dhcp') {
-        this.exception_error = this.pk_dhcp != value
-      }
-      if (key == 'jail_zfs') {
-        this.exception_error = this.pk_jail_zfs != value
-      }
-      // if (key == 'template') {
-      //   this.exception_error = this.pk_template != value
-      // }
-    }
-  }
 }

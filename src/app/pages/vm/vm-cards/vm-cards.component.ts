@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Input, ElementRef, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit,OnDestroy, Input, ElementRef, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MaterialModule } from '../../../appMaterial.module';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
@@ -16,6 +16,8 @@ import { CoreService, CoreEvent } from '../../../core/services/core.service';
 import { EntityUtils } from '../../common/entity/utils';
 import { MatDialog, MatDialogRef, MatSnackBar } from '@angular/material';
 import { EntityJobComponent } from '../../common/entity/entity-job/entity-job.component';
+import { T } from '../../../translate-marker';
+import 'rxjs/add/observable/interval';
 
 interface VmProfile {
   name?:string;
@@ -42,12 +44,12 @@ interface VmProfile {
   templateUrl: './vm-cards.component.html',
   styleUrls: ['./vm-cards.component.css'],
 })
-export class VmCardsComponent implements OnInit {
+export class VmCardsComponent implements OnInit,OnDestroy {
 
   @ViewChild('filter') filter: ElementRef;
   @Input() searchTerm = '';
   @Input() cards = []; // Display List
-  @Input() cache = []; // Master List: 
+  @Input() cache = []; // Master List:
   @ViewChild('viewMode') viewMode:MatButtonToggleGroup;
   focusedVM:string;
   protected dialogRef: any;
@@ -80,14 +82,21 @@ export class VmCardsComponent implements OnInit {
   constructor(protected ws: WebSocketService,protected rest: RestService,private core:CoreService, 
     private dialog: DialogService,protected loader: AppLoaderService,protected router: Router,
     protected matdialog: MatDialog){}
-    
+
+  ngOnDestroy(){
+    this.core.unregister({observerClass:this});
+  }
+
   ngOnInit() {
     this.viewMode.value = "cards";
+    Observable.interval(1000).subscribe((val) => { 
+      this.checkStatus();
+     })
     /*
      * Communication Downwards:
      * Listen for events from UI controls
      * */
-    
+
     this.controlEvents.subscribe((evt:CoreEvent) => {
       const index = this.getCardIndex("id",evt.sender.machineId);
       switch(evt.name){
@@ -115,12 +124,12 @@ export class VmCardsComponent implements OnInit {
       default:
       break;
       }
-      
+
     });
 
-    /* 
+    /*
      * Communication Upwards:
-     * Register the component with the EventBus 
+     * Register the component with the EventBus
      * and subscribe to the observable it returns
      */
     this.core.register({observerClass:this,eventName:"VmProfiles"}).subscribe((evt:CoreEvent) => {
@@ -140,11 +149,20 @@ export class VmCardsComponent implements OnInit {
     });
 
     this.core.register({observerClass:this,eventName:"VmStarted"}).subscribe((evt:CoreEvent) => {
-      const cardIndex = this.getCardIndex('id',evt.data.id);
-      this.cards[cardIndex].state = 'running';
+      if(typeof evt.data.id == "string"){
+        const cardIndex = this.getCardIndex('id',evt.data.id);
+        this.cards[cardIndex].state = 'running';
 
-      const cacheIndex = this.getCardIndex('id',evt.data.id,true);
-      this.cache[cacheIndex].state = 'running';
+        const cacheIndex = this.getCardIndex('id',evt.data.id,true);
+        this.cache[cacheIndex].state = 'running';
+      } else {
+        this.dialog.errorReport(T('VM failed to start') , evt.data.reason, evt.data.trace.formatted)
+        const cardIndex = this.getCardIndex('id',evt.data.id[0]);
+        this.cards[cardIndex].state = 'stopped';
+
+        const cacheIndex = this.getCardIndex('id',evt.data.id[0],true);
+        this.cache[cacheIndex].state = 'stopped';
+      }
     });
 
     this.core.register({observerClass:this,eventName:"VmStopped"}).subscribe((evt:CoreEvent) => {
@@ -194,7 +212,7 @@ export class VmCardsComponent implements OnInit {
     } else {
       this.cards = this.cache.filter((card) => {
         const result = card[key].toLowerCase().indexOf(query.toLowerCase()) > -1;
-        //if(result !== -1){ 
+        //if(result !== -1){
         return result;
         //}
         });
@@ -202,7 +220,7 @@ export class VmCardsComponent implements OnInit {
   }
 
   parseResponse(data:any, formatForUpdate?:boolean){
-    const card: VmProfile = { 
+    const card: VmProfile = {
       name:data.name,
       description:data.description,
       info:data.info,
@@ -213,7 +231,7 @@ export class VmCardsComponent implements OnInit {
       //lazyLoaded: false,
       devices:data.devices,
       vm_type: data.vm_type
-    }   
+    }
 
     // Leave out properties not used for update requests
     if(formatForUpdate){
@@ -238,7 +256,7 @@ export class VmCardsComponent implements OnInit {
     }
     return card;
   }
-  
+
   scrollTo(destination:string){
     this.core.emit({name:"ScrollTo", data: destination});
   }
@@ -260,7 +278,7 @@ export class VmCardsComponent implements OnInit {
       const card = this.parseResponse(res.data[i]);
       //this.checkVnc(card);
       this.cache.push(card);
-    }   
+    }
     if(init){
       this.displayAll();
     } else {
@@ -281,7 +299,7 @@ export class VmCardsComponent implements OnInit {
     if(this.cards[index].isNew && id){
       this.cards[index].isNew = false;
       this.cards[index].id = id;
-    } 
+    }
     this.core.emit({
       name:"VmProfileRequest",
       data:[[["id", "=", String(this.cards[index].id)]]]
@@ -299,7 +317,7 @@ export class VmCardsComponent implements OnInit {
     }
     const card = this.parseResponse(res);
     const index = currentIndex;
-    
+
 
     // delay to allow flip animation
     setTimeout( () => {
@@ -326,7 +344,7 @@ export class VmCardsComponent implements OnInit {
       }
     }
     if(isNew){
-      result.push(isNew) 
+      result.push(isNew)
     }
 
     this.cards = result;
@@ -339,7 +357,7 @@ export class VmCardsComponent implements OnInit {
 
   addVM(){
     const index = this.cards.length;
-    const card: VmProfile = { 
+    const card: VmProfile = {
       name:"",
       description:"",
       info:"",
@@ -368,7 +386,7 @@ export class VmCardsComponent implements OnInit {
   }
 
   deleteVM(index) {
-    this.dialog.confirm("Delete", "Are you sure you want to delete " + this.cards[index].name + "?").subscribe((res) => {
+    this.dialog.confirm("Delete", "Delete " + this.cards[index].name + "?").subscribe((res) => {
       if (res) {
         this.loader.open();
         this.loaderOpen = true;
@@ -425,7 +443,7 @@ export class VmCardsComponent implements OnInit {
       this.getVmList();
     },
   (eres)=>{
-    new EntityUtils().handleError(this, eres); 
+    new EntityUtils().handleError(this, eres);
     this.loader.close();
     });
   }*/
@@ -460,7 +478,7 @@ export class VmCardsComponent implements OnInit {
               this.loader.open();
               this.ws.call('vm.image_path', ['RancherOS']).subscribe((img_path)=>{
                 if(!img_path){
-                  this.dialog.Info('CHECKSUM MISMATCH', 'system checks failed to verify ISO, please try to start again');
+                  this.dialog.Info('CHECKSUM MISMATCH', 'System checks failed to verify ISO. Please try again.');
                   this.loader.close();
                   return;
                 };
@@ -469,7 +487,7 @@ export class VmCardsComponent implements OnInit {
                     // this.ws.call('vm.start',[this.cards[index].id]).subscribe((vm_start)=>{
                     //     this.loader.close();
                     //     if(!vm_start){
-                    //       this.dialog.Info('ERROR', 'vm failed to start, please check system log.');
+                    //       this.dialog.Info('ERROR', 'VM failed to start. Check system log.');
                     //       return;
                     //     }
                     //     this.refreshVM(index, this.cards[index].id);
@@ -523,7 +541,7 @@ export class VmCardsComponent implements OnInit {
 
   cardStyles(){
     const cardStyles = {
-      'width':this.viewMode.value === 'slim' ? '288px' : '480px',  
+      'width':this.viewMode.value === 'slim' ? '288px' : '480px',
       'height': '400px',
       'margin': '50px auto'
     }
@@ -535,8 +553,8 @@ export class VmCardsComponent implements OnInit {
     this.ws.call('vm.get_vnc_web', [ vm.id ]).subscribe((res) => {
       for (const item in res){
         window.open(res[item]);
-      }   
-    }); 
+      }
+    });
   }
 
   serial(index){
@@ -564,7 +582,7 @@ export class VmCardsComponent implements OnInit {
         data:[id]
       });
     } else {
-      for(let i = 0; i < this.cache.length; i++){ 
+      for(let i = 0; i < this.cache.length; i++){
         this.core.emit({
           name:"VmStatusRequest",
           data:[this.cache[i].id]

@@ -1,6 +1,7 @@
-import { WebSocketService, DialogService } from '../../../../services';
+import { WebSocketService, DialogService, JobService } from '../../../../services';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import {Observable, Subject, Subscription} from 'rxjs/Rx';
 
 import * as _ from 'lodash';
 <<<<<<< HEAD
@@ -14,6 +15,7 @@ import { EntityUtils } from '../../../common/entity/utils';
 @Component({
   selector: 'app-cloudsync-list',
   template: `<entity-table [title]="title" [conf]="this"></entity-table>`,
+  providers: [JobService],
 })
 export class CloudsyncListComponent {
 
@@ -26,17 +28,18 @@ export class CloudsyncListComponent {
   protected entityList: any;
 
   public columns: Array < any > = [
-    { name: 'Description', prop: 'description' },
-    { name: 'Direction', prop: 'direction'},
-    { name: 'Path', prop: 'path'},
-    { name: 'Minute', prop: 'minute' },
-    { name: 'Hour', prop: 'hour' },
-    { name: 'Day of Month', prop: 'daymonth' },
-    { name: 'Month', prop: 'month' },
-    { name: 'Day of Week', prop: 'dayweek' },
-    // { name: 'Auxiliary arguments', prop: 'args' },
-    { name: 'Credential', prop: 'credential' },
-    { name: 'Enabled', prop: 'enabled' },
+    { name: T('Description'), prop: 'description' },
+    { name: T('Direction'), prop: 'direction'},
+    { name: T('Path'), prop: 'path'},
+    { name: T('Status'), prop: 'status', state: 'state'},
+    { name: T('Minute'), prop: 'minute' },
+    { name: T('Hour'), prop: 'hour' },
+    { name: T('Day of Month'), prop: 'daymonth' },
+    { name: T('Month'), prop: 'month' },
+    { name: T('Day of Week'), prop: 'dayweek' },
+    // { name: T('Auxiliary arguments'), prop: 'args' },
+    { name: T('Credential'), prop: 'credential' },
+    { name: T('Enabled'), prop: 'enabled' },
   ];
   public config: any = {
     paging: true,
@@ -47,7 +50,8 @@ export class CloudsyncListComponent {
   constructor(protected router: Router,
               protected ws: WebSocketService,
               protected translateService: TranslateService,
-              protected dialog: DialogService) {}
+              protected dialog: DialogService,
+              protected job: JobService) {}
 
   afterInit(entityList: any) {
     this.entityList = entityList;
@@ -58,16 +62,28 @@ export class CloudsyncListComponent {
       id: "run",
       label: T("Run Now"),
       onClick: (row) => {
-        this.dialog.confirm(T("Run Now"), T(" Would you like to run this cloud sync task now?"), true).subscribe((res) => {
+        this.dialog.confirm(T("Run Now"), T("Run this cloud sync now?"), true).subscribe((res) => {
           if (res) {
-            this.ws.call('cloudsync.sync', [parentrow.id]).subscribe(
+            row.state = 'RUNNING';
+            this.ws.call('cloudsync.sync', [row.id]).subscribe(
               (res) => {
                 this.translateService.get("close").subscribe((close) => {
-                  this.entityList.snackBar.open(T('The cloud sync task has started.'), close, { duration: 5000 });
-                })
+                  this.entityList.snackBar.open(T('Cloud sync has started.'), close, { duration: 5000 });
+                });
+                this.job.getJobStatus(res).subscribe((task) => {
+                  row.state = task.state;
+                  row.job.id = task.id;
+                  row.status = task.state;
+                  if (task.error) {
+                    row.status += ":" + task.error;
+                  }
+                  if (task.progress.description && task.state != 'SUCCESS') {
+                    row.status += ':' + task.progress.description;
+                  }
+                });
               },
               (err) => {
-                new EntityUtils().handleError(this, err);
+                new EntityUtils().handleWSError(this.entityList, err);
               })
           }
         });
@@ -76,14 +92,14 @@ export class CloudsyncListComponent {
       id: "edit",
       label: T("Edit"),
       onClick: (row) => {
-        this.route_edit.push(parentrow.id);
+        this.route_edit.push(row.id);
         this.router.navigate(this.route_edit);
       },
     }, {
       id: "delete",
       label: T("Delete"),
       onClick: (row) => {
-        this.entityList.doDelete(parentrow.id);
+        this.entityList.doDelete(row.id);
       },
     }]
   }
@@ -98,7 +114,30 @@ export class CloudsyncListComponent {
       entityList.rows[i].month = entityList.rows[i].schedule['month'];
       entityList.rows[i].dayweek = entityList.rows[i].schedule['dow'];
       entityList.rows[i].credential = entityList.rows[i].credentials['name'];
+      if (entityList.rows[i].job == null) {
+        entityList.rows[i].status = T("Not run since last boot");
+      } else {
+        entityList.rows[i].state = entityList.rows[i].job.state;
+        entityList.rows[i].status = entityList.rows[i].job.state;
+        if (entityList.rows[i].job.error) {
+          entityList.rows[i].status += ":" + entityList.rows[i].job.error;
+        }
+        this.job.getJobStatus(entityList.rows[i].job.id).subscribe((task) => {
+          entityList.rows[i].state = entityList.rows[i].job.state;
+          entityList.rows[i].status = task.state;
+          if (task.error) {
+            entityList.rows[i].status += ":" + task.error;
+          }
+          if (task.progress.description && task.state != 'SUCCESS') {
+            entityList.rows[i].status += ':' + task.progress.description;
+          }
+        });
+      }
     }
 
+  }
+
+  stateButton(row) {
+    this.job.showLogs(row.job.id);
   }
 }

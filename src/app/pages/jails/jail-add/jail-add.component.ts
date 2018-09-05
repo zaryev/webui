@@ -4,6 +4,9 @@ import { T } from '../../../translate-marker'
 import { TranslateService } from '@ngx-translate/core'
 import { Validators } from '@angular/forms';
 
+import { MatDialog, MatDialogRef } from '@angular/material';
+import { EntityJobComponent } from '../../common/entity/entity-job/entity-job.component';
+
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { JailService } from '../../../services';
@@ -35,6 +38,7 @@ export class JailAddComponent implements OnInit {
   public error: string;
   public busy: Subscription;
 
+  protected dialogRef: any;
   protected formFileds: FieldConfig[];
   public basicfieldConfig: FieldConfig[] = [
     {
@@ -70,7 +74,7 @@ export class JailAddComponent implements OnInit {
       name: 'vnet',
       placeholder: T('VNET'),
       tooltip: T('Set to use <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=vnet&sektion=9"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=vnet"\
                   target="_blank">VNET(9)</a> to emulate network \
                   devices for the jail. \
                   A fully virtualized per-jail network stack will be \
@@ -81,7 +85,7 @@ export class JailAddComponent implements OnInit {
       name: 'bpf',
       placeholder: T('Berkeley Packet Filter'),
       tooltip: T('Set to use the Berkeley Packet Filter (<a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=bpf&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=bpf"\
                   target="_blank">BPF(4)</a>) to data link layers in a \
                   protocol independent fashion.'),
     },
@@ -90,13 +94,7 @@ export class JailAddComponent implements OnInit {
       name: 'ip4_interface',
       placeholder: T('IPv4 interface'),
       tooltip: T('IPv4 interface for the jail.'),
-      options: [
-        {
-          label: 'vnet0',
-          value: 'vnet0',
-        }
-      ],
-      value: 'vnet0',
+      options: [],
       relation: [{
         action: 'DISABLE',
         when: [{
@@ -113,7 +111,7 @@ export class JailAddComponent implements OnInit {
       placeholder: T('IPv4 Address'),
       tooltip: T('Configure IPv4 networking or internet access for the \
                   jail. Enter the IPv4 address for <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=vnet&apropos=0&sektion=0&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=vnet"\
                   target="_blank">VNET(9)</a> and shared IP jails. \
                   <br>Single interface format: <b>[interface|]\
                   ip-address\
@@ -183,13 +181,7 @@ export class JailAddComponent implements OnInit {
       name: 'ip6_interface',
       placeholder: T('IPv6 Interface'),
       tooltip: T('IPv6 interface for the jail.'),
-      options: [
-        {
-          label: 'vnet0',
-          value: 'vnet0',
-        }
-      ],
-      value: 'vnet0',
+      options: [],
       class: 'inline',
       width: '30%',
     },
@@ -199,7 +191,7 @@ export class JailAddComponent implements OnInit {
       placeholder: T('IPv6 Address'),
       tooltip: T('Configure IPv6 networking or internet access for the \
                   jail. Enter the IPv6 address for <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=vnet&apropos=0&sektion=0&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=vnet"\
                   target="_blank">VNET(9)</a> and shared IP jails. \
                   <br>Single interface format: <b>[interface|]\
                   ip-address[/netmask]</b>. <br>\
@@ -259,7 +251,7 @@ export class JailAddComponent implements OnInit {
       name: 'devfs_ruleset',
       placeholder: T('devfs_ruleset'),
       tooltip: T('The number of the <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=devfs&apropos=0&sektion=0&manpath=FreeBSD+11.1-RELEASE+and+Ports\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=devfs\
                   "target="_blank">devfs(8) ruleset</a> to enforce when\
                   mounting <b>devfs</b> in the jail. The default value \
                   of <i>0</i> means no ruleset is enforced. Mounting \
@@ -275,7 +267,7 @@ export class JailAddComponent implements OnInit {
       tooltip: T('Commands to run in the jail environment when the jail \
                   is created. Example: <b>sh /etc/rc</b>. The pseudo-\
                   parameters section of <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=jail&apropos=0&sektion=0&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=jail"\
                   target="_blank">JAIL(8)</a> describes \
                   <b>exec.start</b> usage.'),
     },
@@ -357,7 +349,7 @@ export class JailAddComponent implements OnInit {
       tooltip: T('Set this boolean option to <i>True</i> to look for \
                   the <b>exec.jail_user</b> in the system \
                   <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=passwd&sektion=5&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=passwd"\
                   target="_blank">passwd(5)</a> file <i>instead</i> of \
                   the jail passwd.'),
     },
@@ -373,7 +365,7 @@ export class JailAddComponent implements OnInit {
       name: 'mount_devfs',
       placeholder: T('mount.devfs'),
       tooltip: T('Mount a <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=devfs&sektion=5&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=devfs"\
                   target="_blank">devfs(5)</a> filesystem on the \
                   <i>chrooted /dev directory</i> and apply the ruleset \
                   in the <b>devfs_ruleset</b> parameter to restrict \
@@ -384,7 +376,7 @@ export class JailAddComponent implements OnInit {
       name: 'mount_fdescfs',
       placeholder: T('mount.fdescfs'),
       tooltip: T('Mount an <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=fdescfs&sektion=5&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=fdescfs"\
                   target="_blank">fdescfs(5)</a> filesystem in the \
                   jail <i>/dev/fd</i> directory.'),
     },
@@ -396,13 +388,13 @@ export class JailAddComponent implements OnInit {
       tooltip: T('Determine which information the processes in a jail \
                   are able to obtain about mount points. The behavior \
                   of multiple syscalls is affected. <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=statfs&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=statfs"\
                   target="_blank">statfs(2)</a>, <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=statfs&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=statfs"\
                   target="_blank">fstatfs(2)</a>, <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=getfsstat&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=getfsstat"\
                   target="_blank">getfsstat(2)</a>, <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=fhstatfs&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=fhstatfs"\
                   target="_blank">fhstatfs(2)</a>, and other similar \
                   compatibility syscalls. <br> \
                   Set to <i>0</i>: All mount points are available \
@@ -430,7 +422,7 @@ export class JailAddComponent implements OnInit {
                   jail or other jails under this jail. A limit of \
                   <i>0</i> restricts the jail from creating child \
                   jails. Hierarchical Jails in the <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=jail&apropos=0&sektion=0&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=jail"\
                   target="_blank">JAIL(8)</a> man page explains the \
                   finer details.'),
     },
@@ -439,7 +431,7 @@ export class JailAddComponent implements OnInit {
       name: 'login_flags',
       placeholder: T('login_flags'),
       tooltip: T('Flags to pass to <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=login&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=login"\
                   target="_blank">LOGIN(1)</a> when logging in to the \
                   jail using the <b>console</b> function.'),
     },
@@ -556,9 +548,9 @@ export class JailAddComponent implements OnInit {
       name: 'allow_raw_sockets',
       placeholder: T('allow.raw_sockets'),
       tooltip: T('Set to allow raw sockets. Utilities like <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=ping&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=ping"\
                   target="_blank">ping(8)</a> and <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=traceroute&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=traceroute"\
                   target="_blank">traceroute(8)</a> require raw \
                   sockets. When set, source IP addresses are enforced \
                   to comply with the IP addresses bound to the jail, \
@@ -629,7 +621,7 @@ export class JailAddComponent implements OnInit {
                   permission is only effective when <b>allow_mount</b> \
                   is set and <b>enforce_statfs</b> is set to a value \
                   lower than <i>2</i>. The <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=zfs&sektion=8&apropos=0&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=zfs"\
                   target="_blank">ZFS(8)</a> man page has information \
                   on how to configure \
                   the ZFS filesystem to operate from within a jail.'),
@@ -683,7 +675,7 @@ export class JailAddComponent implements OnInit {
       name: 'exec_fib',
       placeholder: T('exec.fib'),
       tooltip: T('This number selects the routing table (<a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=setfib&sektion=1&apropos=0&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=setfib"\
                   target="_blank">FIB</a>) \
                   used when running commands inside the jail.'),
 //There is SETFIB(1) that is network related, and SETFIB(2) that
@@ -842,7 +834,7 @@ export class JailAddComponent implements OnInit {
       name: 'mount_procfs',
       placeholder: T('mount_procfs'),
       tooltip: T('Set to mount a <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=procfs&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=procfs"\
                   target="_blank">procfs(5)</a> filesystems in the \
                   jail <i>/dev/proc</i> directory.'),
     },
@@ -851,7 +843,7 @@ export class JailAddComponent implements OnInit {
       name: 'mount_linprocfs',
       placeholder: T('mount_linprocfs'),
       tooltip: T('Set to mount a <a \
-                  href="https://www.freebsd.org/cgi/man.cgi?query=linprocfs&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+                  href="https://www.freebsd.org/cgi/man.cgi?query=linprocfs"\
                   target="_blank">linprocfs(5)</a> filesystem in the \
                   jail.'),
     },
@@ -882,9 +874,8 @@ export class JailAddComponent implements OnInit {
       placeholder: T('jail_zfs_dataset'),
       tooltip: T('Define the dataset to be jailed and fully handed \
                   over to a jail. Enter a ZFS filesystem name \
-                  <i>without</i> a pool name. <br> \
-                  <b>jail_zfs</b> must be checked for this option to \
-                  work.'),
+                  <i>without</i> a pool name. <b>jail_zfs</b> must \
+                  be set for this option to work.'),
     },
     {
       type: 'input',
@@ -902,7 +893,7 @@ export class JailAddComponent implements OnInit {
  //      name: 'memoryuse',
  //      placeholder: T('memoryuse'),
  //      tooltip: T('Resident set size in bytes. See <a\
- // href="https://www.freebsd.org/cgi/man.cgi?query=rctl&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+ // href="https://www.freebsd.org/cgi/man.cgi?query=rctl"\
  // target="_blank">RCTL(8)</a> for more details.'),
  //    },
  //    {
@@ -924,7 +915,7 @@ export class JailAddComponent implements OnInit {
  //      name: 'rlimits',
  //      placeholder: T('rlimits'),
  //      tooltip: T('Set resource limitations of the jail using the <a\
- // href="https://www.freebsd.org/cgi/man.cgi?query=setrlimit&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+ // href="https://www.freebsd.org/cgi/man.cgi?query=setrlimit"\
  // target="_blank">getrlimit(2)</a> utility.'),
  //    },
  //    {
@@ -1026,7 +1017,7 @@ export class JailAddComponent implements OnInit {
  //      placeholder: T('nsemop'),
  //      tooltip: T('Number of SysV semaphores modified in a single\
  // <a\
- // href="https://www.freebsd.org/cgi/man.cgi?query=semop&sektion=2&manpath=FreeBSD+11.1-RELEASE+and+Ports"\
+ // href="https://www.freebsd.org/cgi/man.cgi?query=semop"\
  // target="_blank">semop(2)</a> call.'),
  //    },
  //    {
@@ -1121,6 +1112,7 @@ export class JailAddComponent implements OnInit {
     protected fieldRelationService: FieldRelationService,
     protected loader: AppLoaderService,
     public translate: TranslateService,
+    protected dialog: MatDialog,
     protected dialogService: DialogService,
     protected networkService: NetworkService) {}
 
@@ -1148,15 +1140,15 @@ export class JailAddComponent implements OnInit {
               }
             },
             (res_remote) => {
-              this.dialogService.errorReport(T('Error: Get remote release choices failed'), res_remote.reason, res_remote.trace.formatted);
+              this.dialogService.errorReport(T('Error: Fetching remote release choices failed.'), res_remote.reason, res_remote.trace.formatted);
             });
         },
         (res_local) => {
-          this.dialogService.errorReport(T('Error: Get local fetched release choices failed'), res_local.reason, res_local.trace.formatted);
+          this.dialogService.errorReport(T('Error: Displaying local fetched releases failed.'), res_local.reason, res_local.trace.formatted);
         });
     },
     (res) => {
-      new EntityUtils().handleError(this, res);
+      new EntityUtils().handleWSError(this, res, this.dialogService);
     });
 
     this.ip4_interfaceField = _.find(this.basicfieldConfig, {'name': 'ip4_interface'});
@@ -1181,7 +1173,7 @@ export class JailAddComponent implements OnInit {
         }
       },
       (res)=>{
-        new EntityUtils().handleError(this, res);
+        new EntityUtils().handleWSError(this, res, this.dialogService);
       }
     );
 
@@ -1207,9 +1199,21 @@ export class JailAddComponent implements OnInit {
       }
     });
     this.formGroup.controls['vnet'].valueChanges.subscribe((res) => {
+      if (res) {
+        if (!_.find(this.ip4_interfaceField.options, { label: 'vnet0'})) {
+          this.ip4_interfaceField.options.push({ label: 'vnet0', value: 'vnet0'});
+        }
+        if (!_.find(this.ip6_interfaceField.options, { label: 'vnet0'})) {
+          this.ip6_interfaceField.options.push({ label: 'vnet0', value: 'vnet0'});
+        }
+      } else {
+        this.ip4_interfaceField.options.pop({ label: 'vnet0', value: 'vnet0'});
+        this.ip6_interfaceField.options.pop({ label: 'vnet0', value: 'vnet0'});
+      }
+
       if (this.formGroup.controls['dhcp'].value && !res) {
         _.find(this.basicfieldConfig, { 'name': 'vnet' }).hasErrors = true;
-        _.find(this.basicfieldConfig, { 'name': 'vnet' }).errors = 'Vnet is required';
+        _.find(this.basicfieldConfig, { 'name': 'vnet' }).errors = 'VNET is required.';
       } else {
         _.find(this.basicfieldConfig, { 'name': 'vnet' }).hasErrors = false;
         _.find(this.basicfieldConfig, { 'name': 'vnet' }).errors = '';
@@ -1218,7 +1222,7 @@ export class JailAddComponent implements OnInit {
     this.formGroup.controls['bpf'].valueChanges.subscribe((res) => {
       if (this.formGroup.controls['dhcp'].value && !res) {
         _.find(this.basicfieldConfig, { 'name': 'bpf' }).hasErrors = true;
-        _.find(this.basicfieldConfig, { 'name': 'bpf' }).errors = 'BPF is required';
+        _.find(this.basicfieldConfig, { 'name': 'bpf' }).errors = 'BPF is required.';
       } else {
         _.find(this.basicfieldConfig, { 'name': 'bpf' }).hasErrors = false;
         _.find(this.basicfieldConfig, { 'name': 'bpf' }).errors = '';
@@ -1329,15 +1333,15 @@ export class JailAddComponent implements OnInit {
     this.error = null;
     let property: any = [];
     let value = _.cloneDeep(this.formGroup.value);
-    if (value['ip4_addr'] == '') {
-      value['ip4_addr'] = 'none';
+    if (value['ip4_addr'] == '' || value['ip4_addr'] == undefined) {
+      delete value['ip4_addr'];
     } else {
       value['ip4_addr'] = value['ip4_interface'] + '|' + value['ip4_addr'] + '/' + value['ip4_netmask'];
     }
     delete value['ip4_interface'];
     delete value['ip4_netmask'];
-    if (value['ip6_addr'] == '') {
-      value['ip6_addr'] = 'none';
+    if (value['ip6_addr'] == '' || value['ip4_addr'] == undefined) {
+      delete value['ip6_addr'];
     } else {
       value['ip6_addr'] = value['ip6_interface'] + '|' + value['ip6_addr'] + '/' + value['ip6_prefix'];
     }
@@ -1381,21 +1385,18 @@ export class JailAddComponent implements OnInit {
     }
     value['props'] = property;
 
-    this.loader.open();
-    this.ws.job(this.addCall, [value]).subscribe(
-      (res) => {
-        this.loader.close();
-        if (res.error) {
-          this.error = res.error;
-        } else {
-          this.router.navigate(new Array('/').concat(this.route_success));
-        }
-      },
-      (res) => {
-        this.loader.close();
-        this.dialogService.errorReport('Error ' + res.error + ':' + res.reason, res.trace.class, res.trace.formatted);
-      }
-    );
+    this.dialogRef = this.dialog.open(EntityJobComponent, { data: { "title": T("Creating Jail") }, disableClose: true });
+    this.dialogRef.componentInstance.setDescription(T("Creating Jail..."));
+    this.dialogRef.componentInstance.setCall(this.addCall, [value]);
+    this.dialogRef.componentInstance.submit();
+    this.dialogRef.componentInstance.success.subscribe((res) => {
+      this.dialogRef.close(true);
+      this.router.navigate(new Array('/').concat(this.route_success));
+    });
+    this.dialogRef.componentInstance.failure.subscribe((res) => {
+      this.dialogRef.close();
+      new EntityUtils().handleWSError(this, res, this.dialogService);
+    });
   }
 
   setStep(index: number) {

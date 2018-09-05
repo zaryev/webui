@@ -43,7 +43,7 @@ export class UserFormComponent {
           type : 'input',
           name : 'username',
           placeholder : T('Username'),
-          tooltip : T('Enter an alphanumeric username of 8 characters\
+          tooltip : T('Enter an alphanumeric username of eight characters\
                       or less. Usernames cannot begin with a hyphen\
                       (<b>-</b>) or contain a space, tab, or these\
                       characters: <b>, : + & # %^ ( ) ! @ ~ * ? < > =</b>\
@@ -73,6 +73,7 @@ export class UserFormComponent {
           tooltip : T('Required unless <b>Enable password login</b> is\
                       <i>No</i>. Passwords cannot contain a <b>?</b>.'),
           inputType : 'password',
+          togglePw: true,
         },
         {
           type : 'input',
@@ -257,12 +258,11 @@ export class UserFormComponent {
               private dialog:DialogService, private cdRef:ChangeDetectorRef ) {}
 
 
-  afterInit(entityForm: any) {
+   afterInit(entityForm: any) {
     this.isNew = entityForm.isNew;
     this.password_disabled = entityForm.formGroup.controls['password_disabled'];
     this.sudo = entityForm.formGroup.controls['sudo'];
     this.locked = entityForm.formGroup.controls['locked'];
-
     this.password_disabled.valueChanges.subscribe((password_disabled)=>{
       if(password_disabled){
         _.find(this.fieldConfig, {name : "locked"}).isHidden = password_disabled;
@@ -341,19 +341,29 @@ export class UserFormComponent {
           entityForm.formGroup.controls['uid'].setValue(next_uid);
         })
       }
-    });
-    /* list shells */
-    entityForm.ws.call('notifier.choices', [ 'SHELL_CHOICES' ])
-        .subscribe((res) => {
-          this.shell = _.find(this.fieldConfig, {name : "shell"});
-          this.shells = res;
-          const bsduser_shell = this.shell
-          res.forEach((item) => {
+      entityForm.ws.call('notifier.choices', [ 'SHELL_CHOICES' ]).subscribe((SHELL_CHOICES) => {
+        this.shell = _.find(this.fieldConfig, {name : "shell"});
+        this.shells = SHELL_CHOICES;
+        SHELL_CHOICES.forEach((item) => {
+        if (entityForm.isNew) {
+          if(item[1] !== "netcli.sh"){
             this.shell.options.push({label : item[1], value : item[0]});
-          });
-          entityForm.formGroup.controls['shell'].setValue(
-              this.shells[1][0]);
+            entityForm.formGroup.controls['shell'].setValue(
+            this.shells[1][0]);
+          };
+        }
+        else {
+          if(entityForm.data && !entityForm.data.bsdusr_builtin) {
+            if(item[1] !== "netcli.sh"){
+              this.shell.options.push({label : item[1], value : item[0]});
+            }
+          } else {
+            this.shell.options.push({label : item[1], value : item[0]});
+          } 
+        } 
         });
+      });
+    });
     if (!entityForm.isNew){
       entityForm.submitFunction = this.submitFunction;
     }

@@ -114,6 +114,7 @@ export class EntityFormComponent implements OnInit, OnDestroy, OnChanges, AfterV
   public wsResponseIdx;
   public queryResponse;
   public saveSubmitText = "Save";
+  public showPassword = false;
 
   get controls() {
     return this.fieldConfig.filter(({type}) => type !== 'button');
@@ -345,6 +346,7 @@ export class EntityFormComponent implements OnInit, OnDestroy, OnChanges, AfterV
     }
     // ...but for entity forms that don't make a data request, this kicks in 
     setTimeout(() => { this.setShowDefaults(); }, 500);
+
   }
 
   setShowDefaults() {
@@ -471,7 +473,7 @@ export class EntityFormComponent implements OnInit, OnDestroy, OnChanges, AfterV
                               this.router.navigate(new Array('/').concat(
                                   this.conf.route_success));
                             } else {
-                              this.snackBar.open("All your settings are saved.", 'close', { duration: 5000 })
+                              this.snackBar.open("Settings saved.", 'close', { duration: 5000 })
                               this.success = true;
                             }
 
@@ -485,8 +487,8 @@ export class EntityFormComponent implements OnInit, OnDestroy, OnChanges, AfterV
                           this.loader.close();
                           if (this.conf.errorReport){
                             this.conf.errorReport(res);
-                          } else if (res.hasOwnProperty("reason") && (res.hasOwnProperty("trace") && res.hasOwnProperty("type"))) {
-                            this.dialog.errorReport(res.type, res.reason, res.trace.formatted);
+                          } else if (res.hasOwnProperty("reason") && (res.hasOwnProperty("trace"))) {
+                            new EntityUtils().handleWSError(this, res); 
                           }
                           else {
                             new EntityUtils().handleError(this, res);
