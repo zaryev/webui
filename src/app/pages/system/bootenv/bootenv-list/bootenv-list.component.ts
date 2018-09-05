@@ -105,6 +105,8 @@ export class BootEnvironmentListComponent {
     {
       id: "unkeep",
       label: "Unkeep",
+      icon: "thumb_down",
+      ttpos: "above",
       enable: true,
       onClick : (selected) => {
         this.toggleKeep(selected[0].id, selected[0].keep);
@@ -113,6 +115,8 @@ export class BootEnvironmentListComponent {
     {
       id: "keep",
       label: "Keep",
+      icon: "thumb_up",
+      ttpos: "above",
       enable: true,
       onClick : (selected) => {
         this.toggleKeep(selected[0].id, selected[0].keep);
@@ -148,6 +152,7 @@ export class BootEnvironmentListComponent {
     } else {
       _.find(this.singleActions, {'id': 'unkeep'})['enable'] = false;
     }
+    console.log(this.singleActions)
   }
 
   preInit(){
@@ -202,7 +207,12 @@ export class BootEnvironmentListComponent {
         return "Now/Reboot";
       }
       return row.active
-
+    }
+    if (attr === 'keep') {
+      if (!row.keep) {
+        return false;
+      }
+      return row.keep;
     }
     return row[attr];
   }
