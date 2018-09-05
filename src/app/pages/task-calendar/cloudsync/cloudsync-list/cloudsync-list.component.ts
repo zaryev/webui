@@ -4,13 +4,9 @@ import { Router } from '@angular/router';
 import {Observable, Subject, Subscription} from 'rxjs/Rx';
 
 import * as _ from 'lodash';
-<<<<<<< HEAD
-import { TaskService } from '../../../../services';
-=======
 import { T } from '../../../../translate-marker';
 import { TranslateService } from '@ngx-translate/core';
 import { EntityUtils } from '../../../common/entity/utils';
->>>>>>> master
 
 @Component({
   selector: 'app-cloudsync-list',
