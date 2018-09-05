@@ -152,7 +152,6 @@ export class BootEnvironmentListComponent {
     } else {
       _.find(this.singleActions, {'id': 'unkeep'})['enable'] = false;
     }
-    console.log(this.singleActions)
   }
 
   preInit(){

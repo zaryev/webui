@@ -246,6 +246,7 @@ export class EntityTableComponent implements OnInit, AfterViewInit {
         }
       }
     );
+    this.selected = []; // empties selected list to dismiss buttons on some pages. What might it break???
   }
 
   handleData(res): any {
@@ -304,7 +305,6 @@ export class EntityTableComponent implements OnInit, AfterViewInit {
     }
     
     this.currentRows = this.rows;
-    console.log(this.currentRows)
     this.paginationPageIndex  = 0;
     this.setPaginationInfo();
     this.showDefaults = true;
@@ -385,7 +385,7 @@ export class EntityTableComponent implements OnInit, AfterViewInit {
   }
 
   doDelete(id) {
-    console.log(id)
+    // console.log(id)
     let dialog = {};
     if (this.conf.checkbox_confirm && this.conf.checkbox_confirm_show && this.conf.checkbox_confirm_show(id)) {
       this.conf.checkbox_confirm(id);
@@ -511,9 +511,9 @@ export class EntityTableComponent implements OnInit, AfterViewInit {
 
     for (let i = 0; i < this.selected.length; i++) {
       if (this.selected[i].active && this.selected[i].active !== '-') {
-        console.log(this.selected);
-        console.log(this.selected.splice(i, 1));
-        console.log(this.selected);
+        // console.log(this.selected);
+        // console.log(this.selected.splice(i, 1));
+        // console.log(this.selected);
       } 
     }
 

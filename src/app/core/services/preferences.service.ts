@@ -118,7 +118,7 @@ export class PreferencesService {
 
   // Save to middleware
   savePreferences(data?:UserPreferences){
-    console.log(data);
+    // console.log(data);
     if(!data){
       data = this.preferences;
     }
@@ -154,7 +154,7 @@ export class PreferencesService {
     newProps.forEach((item, index) => {
     	merged[item] = fui[item];	
     });
-    console.log(merged)
+    // console.log(merged)
     return merged;
   }
 
