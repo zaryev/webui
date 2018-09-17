@@ -98,7 +98,7 @@
     "raven-js": "3.22.1",
     "rxjs": "5.5.6",
     "webpack": "3.10.0",
-    "xterm": "2.9.2",
+    "xterm": "^3.7.0",
     "zone.js": "0.8.20"
   },
   "devDependencies": {

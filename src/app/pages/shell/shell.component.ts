@@ -19,6 +19,11 @@ import { T } from '../../translate-marker';
 //import { Terminal } from 'vscode-xterm';
 //import * as fit from 'vscode-xterm/lib/addons/fit';
 //import * as attach from 'vscode-xterm/lib/addons/attach';
+import { Terminal } from 'xterm';
+// import { attach } from 'xterm/lib/addons/attach/attach';
+// import { fit } from 'xterm/lib/addons/fit/fit';
+import * as attach from 'xterm/lib/addons/attach/attach';
+import * as fit from 'xterm/lib/addons/fit/fit';
 
 @Component({
   selector: 'app-shell',
@@ -59,9 +64,9 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
     this.getAuthToken().subscribe((res) => {
       this.initializeWebShell(res);
       this.shellSubscription = this.ss.shellOutput.subscribe((value) => {
-        if (value !== undefined) {
-          this.xterm.write(value);
-        }
+        // if (value !== undefined) {
+        //   this.xterm.write(value);
+        // }
       });
       this.initializeTerminal();
     });
@@ -98,27 +103,35 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   initializeTerminal() {
-    const domHeight = document.body.offsetHeight;
-    const domWidth = document.body.offsetWidth;
-    let colNum = (domWidth * 0.75 - 104) / 10;
-    if (colNum < 80) {
-      colNum = 80;
-    }
-    let rowNum = (domHeight * 0.75 - 104) / 21;
-    if (rowNum < 10) {
-      rowNum = 10;
-    }
+    // const domHeight = document.body.offsetHeight;
+    // const domWidth = document.body.offsetWidth;
+    // let colNum = (domWidth * 0.75 - 104) / 10;
+    // if (colNum < 80) {
+    //   colNum = 80;
+    // }
+    // let rowNum = (domHeight * 0.75 - 104) / 21;
+    // if (rowNum < 10) {
+    //   rowNum = 10;
+    // }
 
-    this.xterm = new (<any>window).Terminal({
-      'cursorBlink': false,
-      'tabStopWidth': 8,
-      // 'cols': parseInt(colNum.toFixed(),10),
-      // 'rows': parseInt(rowNum.toFixed(),10),
-      'focus': true
-    });
+    // this.xterm = new (<any>window).Terminal({
+    //   'cursorBlink': false,
+    //   'tabStopWidth': 8,
+    //   // 'cols': parseInt(colNum.toFixed(),10),
+    //   // 'rows': parseInt(rowNum.toFixed(),10),
+    //   'focus': true
+    // });
+    Terminal.applyAddon(attach);
+    Terminal.applyAddon(fit);
+    
+    this.xterm = new Terminal();
     this.xterm.open(this.container.nativeElement);
-    this.xterm.attach(this.ss);
-    this.xterm._initialized = true;
+    // attach(this.xterm, this.ss.socket, true, true);
+    // fit(this.xterm);
+    (<any>this.xterm).attach(this.ss.socket, true, true);
+    (<any>this.xterm).fit();
+    // this.xterm.attach(this.ss);
+    // this.xterm._initialized = true;
   }
 
   resizeTerm(){
