@@ -498,6 +498,7 @@ export class DisplayObject {
 
   startResizeLeft(){
     console.log("Start Resizing!");
+    this.messageBus.emit({name: "ResizeStarted" + this.id});
     let element = styler(this.rawElement, {});
     
     let elementStartX = element.get('x');
@@ -525,6 +526,7 @@ export class DisplayObject {
 
   startResizeRight(){
     //console.log("Start Resizing!");
+    this.messageBus.emit({name: "ResizeStarted" + this.id});
     let element = styler(this.rawElement, {});
     
     let elementStartX = element.get('x');
