@@ -309,4 +309,88 @@ body.collapsed-menu mat-sidenav-container.mat-drawer-opened mat-sidenav-content.
 }
 
 
+/* Drag and Drop via IMS & Display Objects*/
+.shadow{
+box-shadow:0 8px 23px rgba(0,0,0,0.75);
+  display:block;
+  position:fixed;
+  user-select:none;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+  backface-visibility: hidden;
+  opacity:0.9999; /* fixes backface-visibility problems in some browsers */
+}
+
+.shadow > div:last-child{
+  height:inherit; 
+  backface-visibility: hidden;
+}
+
+.shadow.focused{
+  z-index:20;
+}
+
+.drag { 
+  user-select:none;
+}
+
+
+/* RESIZE HANDLES*/
+div.resize-handle-top,
+div.resize-handle-right,
+div.resize-handle-bottom,
+div.resize-handle-left{
+  position:absolute;
+  z-index:20;
+}
+
+/*.drag div.resize-handle-top,
+.drag div.resize-handle-right,
+.drag div.resize-handle-bottom,
+.drag div.resize-handle-left{
+  cursor:default;
+}*/
+
+div.resize-handle-top{
+  top:-8px;
+}
+div.resize-handle-bottom{
+  bottom:-8px;
+}
+div.resize-handle-top,
+div.resize-handle-bottom{
+  width:100%;
+  height:16px;
+}
+
+div.resize-handle-left{
+  left:-8px;
+}
+div.resize-handle-right{
+  right:-8px;
+}
+div.resize-handle-left,
+div.resize-handle-right{
+  width:16px;
+  height:100%;
+  top:0;
+}
+
+/* Resize Mouse Cursors*/
+div.resize-handle-top:hover,
+div.resize-handle-bottom:hover,
+div.resize-handle-left:hover,
+div.resize-handle-right:hover{
+  cursor:default;
+}
+
+.resizeable div.resize-handle-top:hover,
+.resizeable div.resize-handle-bottom:hover{
+  cursor:ns-resize;
+}
+
+.resizeable div.resize-handle-left:hover,
+.resizeable div.resize-handle-right:hover{
+  cursor:ew-resize;
+}
 

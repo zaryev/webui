@@ -1,19 +1,30 @@
-<mat-card class="p-0">
-  <mat-card-title class="mat-bg-primary m-0">
+<mat-card class="p-0" id="{{id}}">
+  <div class="drag-handle"></div>
+  <mat-toolbar class="m-0">
   	 <div class="card-title-text">
-  	 	{{"Shell" | translate}}
-  	 </div>
-  </mat-card-title>
-	<div id="terminal" [ngStyle]="{'font-size' : font_size+'px'}"  #terminal (window:resize)="onResize($event)"></div>
-	<mat-card-content *ngIf="shellConnected; else Reconnect">
-		<mat-divider class="mb-1"></mat-divider>
-		{{"Set font size" | translate}}: <mat-slider min="10" max="20" step="1" value="14"  [(ngModel)]="font_size"></mat-slider>
-		<button mat-button (click)="resetDefault()" matTooltip="{{'Reset font size to default value' | translate }}">{{"Restore default" | translate}}</button>
-		<tooltip class="shellTooltip" [message]=shell_tooltip></tooltip>
-	</mat-card-content>
+  	  <mat-icon role="img" fontSet="mdi-set" fontIcon="mdi-console-line"></mat-icon> 
+          <!--{{"Shell" | translate}}-->
+          </div>
+        <div class="xterm-controls" style="">
+          <!--<mat-divider class="mb-1"></mat-divider>-->
+          <span class="xterm-control">
+  	  <mat-icon role="img" fontSet="mdi-set" fontIcon="mdi-format-size"></mat-icon> 
+          <!--{{"Set font size" | translate}}: -->
+            <mat-slider name="font_size" min="10" max="20" step="1" value="14"  [(ngModel)]="font_size"></mat-slider>
+          </span>
+		<button class="xterm-control" mat-button (click)="resetDefault()" matTooltip="{{'Reset font size to default value' | translate }}">
+                  {{"Restore default" | translate}}
+                </button>
+		<tooltip class="xterm-control shellTooltip" [message]=shell_tooltip></tooltip>
 	<ng-template #Reconnect>
 		<mat-card-content>
 			<button mat-button color="primary" (click)="reconnect()">{{"Reconnect" | translate}}</button>
 		</mat-card-content>
 	</ng-template>
+        </div>
+  </mat-toolbar>
+  <!--<mat-card-content *ngIf="shellConnected; else Reconnect"> -->
+  <mat-card-content> 
+    <div id="terminal-wrapper" [ngStyle]="{'font-size' : font_size+'px'}"  #terminal [ngClass]="{'resizing': isResizing}"></div>
+    </mat-card-content>
 </mat-card>

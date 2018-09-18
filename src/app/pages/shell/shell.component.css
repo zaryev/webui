@@ -1,4 +1,61 @@
 .shellTooltip {
-  position: absolute !important;
-  right: 20px;
+  vertical-align:middle;
+  /*position: absolute !important;
+  right: 20px;*/
+  font-size:15px;
+}
+
+:host ::ng-deep .tooltip .tooltiptext {
+  white-space:initial;
+}
+
+.mat-card.p-0{
+  margin:0;
+  background-color:#000;
+  min-width:600px;
+  min-height:300px;
+}
+.mat-card.p-0 .drag-handle{
+  width:100%;
+  height:48px;
+  position:absolute;
+  top:0;
+  left:0;
+}
+.mat-card.p-0 .mat-card-content{
+  padding:0;
+  height:calc(100% - 48px);
+}
+#terminal-wrapper.resizing{
+  overflow:hidden;
+}
+#terminal-wrapper{
+  height:inherit;
+  width:inherit;
+}
+
+.mat-toolbar{
+  height:48px;
+  background-color:#333;
+  /*position:relative;
+  z-index:2;*/
+}
+
+.mat-toolbar .card-title-text{
+  width:80px;
+  display:inline-block;
+}
+
+.mat-toolbar .xterm-controls{
+  width: calc(100% - 80px);
+  display:inline-block;
+}
+
+.terminal{
+  height:calc(100% - 48px);
+  overflow-x: auto;
+}
+
+.xterm-controls{
+  text-align:right;
 }

@@ -1,7 +1,9 @@
 import {
   Component,
   OnInit,
+  AfterViewInit,
   ViewChild,
+  ViewChildren,
   ElementRef,
   OnChanges,
   Input,
@@ -11,6 +13,14 @@ import {
   OnDestroy
 } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
+import { CoreService, CoreEvent } from 'app/core/services/core.service';
+import { iXObject } from 'app/core/classes/ix-object';
+import { DisplayObject } from 'app/core/classes/display-object';
+import * as Terminal from 'xterm/dist/xterm';
+import 'xterm/dist/addons/fit/fit.js';
+import 'xterm/dist/addons/attach/attach.js';
+
+
 
 import { WebSocketService, ShellService } from '../../services/';
 import { TranslateService } from '@ngx-translate/core';
@@ -27,17 +37,23 @@ import { T } from '../../translate-marker';
   providers: [ShellService],
 })
 
-export class ShellComponent implements OnInit, OnChanges, OnDestroy {
+export class ShellComponent extends iXObject implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   // sets the shell prompt
   @Input() prompt = '';
-  //xter container
+  //xterm container
+  //@ViewChildren('terminal') container: ElementRef;
   @ViewChild('terminal') container: ElementRef;
+  private containerElement: DisplayObject;
   // xterm variables
   cols: string;
   rows: string;
   font_size: number;
+  // Help determine xterm resize parameters
+  private colW: number;
+  private rowH: number;
   public token: any;
   public xterm: any;
+  private isResizing:boolean = false;
   public resize_terminal = true;
   private shellSubscription: any;
 
@@ -56,15 +72,31 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
   public shellConnected: boolean = false;
 
   ngOnInit() {
-    this.getAuthToken().subscribe((res) => {
-      this.initializeWebShell(res);
-      this.shellSubscription = this.ss.shellOutput.subscribe((value) => {
-        if (value !== undefined) {
-          this.xterm.write(value);
-        }
-      });
-      this.initializeTerminal();
+  }
+
+  ngAfterViewInit(){
+    this.resetDefault();
+
+
+    this.core.register({observerClass:this, eventName:this.id}).subscribe((evt:CoreEvent) => {
+      this.containerElement = evt.data;
+      this.containerElement.element.set('height', 400);
+      this.prepareTerminalConnection();
+    })
+
+    this.core.register({observerClass:this, eventName:"ResizeStarted" + this.id}).subscribe((evt:CoreEvent) => {
+      this.isResizing = true;
     });
+
+    this.core.register({observerClass:this, eventName:"ResizeStopped" + this.id}).subscribe((evt:CoreEvent) => {
+      console.log("Shell heard the release...");
+      this.isResizing = false;
+      //this.resizeTerminal();
+      this.xterm.fit();
+    })
+
+    this.core.emit({name:"RegisterAsDisplayObject", data:{ id:"#" + this.id , moveHandle: "#" + this.id + " .drag-handle"} });
+    this.core.emit({name:"RequestDisplayObjectReference", data:this.id});
   }
 
   ngOnDestroy() {
@@ -74,6 +106,8 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
     if(this.shellSubscription){
       this.shellSubscription.unsubscribe();
     }
+
+    this.core.unregister({observerClass:this});
   };
 
   onResize(event){
@@ -97,8 +131,26 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  prepareTerminalConnection(){
+    this.getAuthToken().subscribe((res) => {
+      this.initializeWebShell(res);
+      this.shellSubscription = this.ss.shellOutput.subscribe((value) => {
+        if (value !== undefined) {
+          this.xterm.write(value);
+        }
+      });
+
+    /*this.container.changes.subscribe((comps: QueryList<MyComponent>) => {
+      // Now you can access to the child component
+      this.initializeTerminal();
+    });*/
+      console.log("prep")
+      this.initializeTerminal();
+    });
+  }
+
   initializeTerminal() {
-    const domHeight = document.body.offsetHeight;
+    /*const domHeight = document.body.offsetHeight;
     const domWidth = document.body.offsetWidth;
     let colNum = (domWidth * 0.75 - 104) / 10;
     if (colNum < 80) {
@@ -107,18 +159,50 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
     let rowNum = (domHeight * 0.75 - 104) / 21;
     if (rowNum < 10) {
       rowNum = 10;
-    }
+    }*/
 
-    this.xterm = new (<any>window).Terminal({
-      'cursorBlink': false,
-      'tabStopWidth': 8,
-      // 'cols': parseInt(colNum.toFixed(),10),
-      // 'rows': parseInt(rowNum.toFixed(),10),
-      'focus': true
-    });
+    this.xterm = new Terminal();
+    console.log("init");
+    
     this.xterm.open(this.container.nativeElement);
-    this.xterm.attach(this.ss);
+    console.log(this.container.nativeElement)
+    //this.xterm.open(this.container.first.nativeElement);
+    //this.xterm.open(this.containerElement.rawElement);
+    this.xterm.attach(this.ss); 
     this.xterm._initialized = true;
+    this.xterm.focus();
+    this.xterm.fit();
+    
+    return this.xterm;
+  }
+
+  resizeTerminal(getUnits?: boolean){
+    if(getUnits){
+      this.colW = this.calcColWidth();
+      this.rowH = this.calcRowHeight();
+    }
+    console.log("resizing terminal...")
+    console.log(this.colW);
+    console.log(this.rowH);
+    console.log("Width = " + this.containerElement.width + " && Height = " + (this.containerElement.height - 48))
+    console.log("CURRENTLY: Cols = " + this.xterm.cols + " && Rows = " + this.xterm.rows);
+    console.log(this.font_size)
+    const cols = this.containerElement.width / this.colW;
+    const rows = (this.containerElement.height - 48) / this.rowH; // Subtract mat-toolbar height
+    console.log("RESIZING TO: Cols = " + cols + " && Rows = " + rows);
+    this.xterm.geometry = [cols, rows]
+    this.xterm.resize( 75, rows);
+    this.xterm.reset();
+    console.log(this.containerElement.height);
+
+  }
+
+  calcRowHeight(){
+    return Math.ceil(this.containerElement.height / this.xterm.rows);
+  }
+
+  calcColWidth(){
+    return Math.ceil(this.containerElement.width / this.xterm.cols)
   }
 
   resizeTerm(){
@@ -153,7 +237,8 @@ export class ShellComponent implements OnInit, OnChanges, OnDestroy {
     this.ss.connect();
   }
 
-  constructor(private ws: WebSocketService, public ss: ShellService, public translate: TranslateService) {
+  constructor(private core:CoreService, private ws: WebSocketService, public ss: ShellService, public translate: TranslateService, elRef: ElementRef) {
+    super();
 //    Terminal.applyAddon(fit);
 //    Terminal.applyAddon(attach);
   }
