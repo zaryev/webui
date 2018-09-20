@@ -109,23 +109,4 @@ export class EntityDialogComponent implements OnInit {
       this.fieldConfig[f].hasErrors = false;
     }
   }
-
-  togglePW() {
-    let inputs = document.getElementsByTagName('input');
-    for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].placeholder.toLowerCase().includes('current') && 
-          !inputs[i].placeholder.toLowerCase().includes('root')) {
-        if (inputs[i].placeholder.toLowerCase().includes('password') || 
-        inputs[i].placeholder.toLowerCase().includes('passphrase') ||
-        inputs[i].placeholder.toLowerCase().includes('secret')) {
-          if (inputs[i].type === 'password') {
-            inputs[i].type = 'text';
-          } else {
-            inputs[i].type = 'password';
-          }
-        }
-      }
-    }
-    this.showPassword = !this.showPassword;
-  }
 }

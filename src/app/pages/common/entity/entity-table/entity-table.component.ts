@@ -306,6 +306,7 @@ export class EntityTableComponent implements OnInit, AfterViewInit {
     }
 
     this.currentRows = this.rows;
+    console.log(this.currentRows)
     this.paginationPageIndex  = 0;
     this.setPaginationInfo();
     this.showDefaults = true;
