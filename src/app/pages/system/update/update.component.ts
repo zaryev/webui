@@ -100,7 +100,7 @@ export class UpdateComponent implements OnInit {
           if(branch2 === "nightlies") {
             return "NIGHTLY_UPGRADE";
           } else if(branch1 === "nightlies") {
-            return "NIGHTLY_DOWNGRADE";
+            return "ALLOWED";
           }
         } else {
           if(version2[0] ==="HEAD"){
@@ -185,7 +185,7 @@ export class UpdateComponent implements OnInit {
       } else if (this.selectedTrain.toLowerCase().includes('11-stable')) {
         this.currentTrainDescription = '[release]';
       } else if (this.selectedTrain.toLowerCase().includes('11.2-stable')) {
-        this.currentTrainDescription = '[prerelease]';
+        this.currentTrainDescription = '[release]';
       } else {
         this.currentTrainDescription = res.trains[this.selectedTrain].description.toLowerCase();
       }
@@ -194,6 +194,7 @@ export class UpdateComponent implements OnInit {
 
   onTrainChanged(event){
     const compare = this.compareTrains(this.selectedTrain, event.value);
+    console.log(compare)
     if(compare === "NIGHTLY_DOWNGRADE" || compare === "MINOR_DOWNGRADE" || compare === "MAJOR_DOWNGRADE" || compare ==="SDK") {
       this.dialogService.Info("Error", this.train_msg[compare]).subscribe((res)=>{
         this.train = this.selectedTrain;
@@ -399,8 +400,8 @@ export class UpdateComponent implements OnInit {
             this.pre_release_train = false;
             this.nightly_train = false;
           } else if(this.currentTrainDescription.includes('[prerelease]')) {
-            this.release_train = false;
-            this.pre_release_train = true;
+            this.release_train = true;
+            this.pre_release_train = false;
             this.nightly_train = false;
           } else {
             this.release_train = false;
