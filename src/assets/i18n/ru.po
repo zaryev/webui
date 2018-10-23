@@ -105,7 +105,10 @@ msgid "Access Key"
 msgstr ""
 
 msgid "Account"
-msgstr ""
+msgstr "Акаунт"
+
+msgid "Accounts"
+msgstr "Акаунты"
 
 msgid "Account Key"
 msgstr ""
@@ -2481,19 +2484,19 @@ msgid ""
 msgstr ""
 
 msgid "Group"
-msgstr ""
+msgstr "Группа"
 
 msgid "Group ID"
-msgstr ""
+msgstr "ID Группы"
 
 msgid "Groups"
-msgstr ""
+msgstr "Группы"
 
 msgid "Guest Access"
 msgstr ""
 
 msgid "Guest Account"
-msgstr ""
+msgstr "Гостевой аккаунт"
 
 msgid "Guest Operating System."
 msgstr ""
@@ -4700,7 +4703,7 @@ msgid "Syslog server"
 msgstr ""
 
 msgid "System"
-msgstr ""
+msgstr "Система"
 
 msgid "System Dataset"
 msgstr ""
@@ -5260,7 +5263,7 @@ msgid "Username used to logon to the provider and update the       record."
 msgstr ""
 
 msgid "Users"
-msgstr ""
+msgstr "Пользователи"
 
 msgid "Users & Groups"
 msgstr ""
